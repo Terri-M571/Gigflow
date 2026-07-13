@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - Learning Hub</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in" style="display: flex; flex-direction: column; gap: 24px;">
+            <div style="margin-bottom: 8px;">
+                <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Learning Pathways</h1>
+                <p style="color: var(--text-muted);">Expand your career skills to align with market expectations</p>
+            </div>
+
+            <!-- Roadmaps Section -->
+            <section class="card" style="padding: 24px;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Target Career Roadmap</h3>
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <h4 style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">Senior Product Designer Roadmap</h4>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0;">Completed 3/5 skill checkpoints. Next target milestone: <b>Framer Micro-interactions</b></p>
+                    </div>
+                    <div style="font-size: 1.4rem; font-weight: 800; color: var(--secondary);">60% Done</div>
+                </div>
+                <!-- Progress Line -->
+                <div class="progress-bar-container" style="background-color: var(--surface-low); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 16px;">
+                    <div class="progress-bar-fill" style="width: 60%; background-color: var(--primary); height: 100%;"></div>
+                </div>
+            </section>
+
+            <!-- Active Courses list -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <h3 style="font-size: 1.2rem; font-weight: 800;">Your Enrolled Courses</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;" id="learning-courses-list">
+                    <!-- Cards -->
+                    <div class="card hover-lift" style="padding: 20px;">
+                        <span class="badge badge-primary" style="margin-bottom: 12px;">UI/UX Design</span>
+                        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 4px;">Next-Generation Design Systems</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Elena Rostova &bull; Figma Expert</p>
+                        
+                        <div class="flex-between" style="font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">
+                            <span>Progress</span>
+                            <span>65%</span>
+                        </div>
+                        <div class="progress-bar-container" style="background-color: var(--surface-low); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 16px;">
+                            <div class="progress-bar-fill" style="width: 65%; background-color: var(--primary); height: 100%;"></div>
+                        </div>
+                        <button class="btn btn-primary w-full" style="font-size: 0.8rem; padding: 8px 0;" onclick="showToast('Loading course workspace...', 'success')">Resume Learning</button>
+                    </div>
+
+                    <div class="card hover-lift" style="padding: 20px;">
+                        <span class="badge badge-secondary" style="margin-bottom: 12px;">Development</span>
+                        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 4px;">Mastering AI-Assisted Front-End Workflows</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Marcus Vance &bull; Ex-Google Engineer</p>
+                        
+                        <div class="flex-between" style="font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">
+                            <span>Progress</span>
+                            <span>30%</span>
+                        </div>
+                        <div class="progress-bar-container" style="background-color: var(--surface-low); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 16px;">
+                            <div class="progress-bar-fill" style="width: 30%; background-color: var(--secondary); height: 100%;"></div>
+                        </div>
+                        <button class="btn btn-secondary w-full" style="font-size: 0.8rem; padding: 8px 0;" onclick="showToast('Loading course workspace...', 'success')">Resume Learning</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

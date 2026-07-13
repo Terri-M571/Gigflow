@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GigFlow AI - Resume Builder</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#eff4ff",
+                        "secondary-fixed": "#ffdcc1",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#ffb9a4",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#d5e3fc",
+                        "on-tertiary-fixed": "#3a0b00",
+                        "tertiary-fixed-dim": "#ffb59e",
+                        "primary": "#003594",
+                        "inverse-primary": "#b4c5ff",
+                        "on-surface": "#0d1c2e",
+                        "on-secondary-fixed-variant": "#6c3a00",
+                        "on-surface-variant": "#434654",
+                        "on-background": "#0d1c2e",
+                        "surface-tint": "#1b55d0",
+                        "tertiary-fixed": "#ffdbd0",
+                        "on-secondary-fixed": "#2e1500",
+                        "secondary-fixed-dim": "#ffb779",
+                        "inverse-on-surface": "#eaf1ff",
+                        "background": "#f8f9ff",
+                        "surface-container": "#e6eeff",
+                        "primary-container": "#004ac6",
+                        "surface": "#f8f9ff",
+                        "primary-fixed": "#dbe1ff",
+                        "secondary": "#8f4e00",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "inverse-surface": "#233144",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#703c00",
+                        "tertiary-container": "#9c2e02",
+                        "surface-bright": "#f8f9ff",
+                        "outline-variant": "#c3c6d6",
+                        "surface-dim": "#ccdbf3",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#751f00",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#b8c8ff",
+                        "outline": "#737685",
+                        "surface-container-highest": "#d5e3fc",
+                        "surface-container-high": "#dce9ff",
+                        "on-tertiary-fixed-variant": "#842500",
+                        "on-primary-fixed": "#00174b",
+                        "secondary-container": "#fda552"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "unit": "4px",
+                        "margin-desktop": "32px",
+                        "md": "16px",
+                        "xxl": "48px",
+                        "container-max": "1280px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .resume-preview-container {
+            height: calc(100vh - 128px);
+        }
+        /* Custom scrollbar for editor */
+        .editor-scroll::-webkit-scrollbar { width: 6px; }
+        .editor-scroll::-webkit-scrollbar-track { background: transparent; }
+        .editor-scroll::-webkit-scrollbar-thumb { background: #c3c6d6; border-radius: 10px; }
+        
+        /* Shimmer effect for AI processing */
+        .shimmer {
+            background: linear-gradient(90deg, #003594 0%, #004ac6 50%, #003594 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background selection:bg-primary-fixed">
+<!-- TopNavBar -->
+<nav class="bg-surface-container-lowest/80 backdrop-blur-md dark:bg-surface-container-lowest/80 docked full-width top-0 sticky z-50 shadow-sm border-b border-outline-variant h-16">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-full">
+<div class="flex items-center gap-xl">
+<span class="font-display-lg text-display-lg font-bold text-primary dark:text-primary-fixed-dim">GigFlow</span>
+<div class="hidden md:flex items-center gap-lg">
+<a class="text-on-surface-variant font-medium hover:text-primary-container transition-colors font-label-md text-label-md" href="#">Home</a>
+<a class="text-on-surface-variant font-medium hover:text-primary-container transition-colors font-label-md text-label-md" href="#">Jobs</a>
+<a class="text-on-surface-variant font-medium hover:text-primary-container transition-colors font-label-md text-label-md" href="#">Freelance</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" href="#">Resume Builder</a>
+<a class="text-on-surface-variant font-medium hover:text-primary-container transition-colors font-label-md text-label-md" href="#">Learning Hub</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-sm" data-icon="notifications">notifications</button>
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a modern creative worker in a high-tech studio environment. The lighting is soft and directional, creating a premium professional feel with a clean white and light blue color palette consistent with a tech-luxe aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCobDojlshT53FvmgO-zjFTeN6XXSzeoJU_FjqZ_wuxO6w2-4Xj67lNOAYVPPIXW8TkQWMmItas-a-wEK6KSn7yvxXNSBJTSzMyUMb8-3mT6k_C3CT4jKFhe8eeEISh1wbSgM9XeUnCYS8ma1UgVaJkBCTyHmrSQnx4dEUNcFempQ-utpWTFuoBL3hsp7PGc8FUSlyDHvfLwQXW5kZX_rwJBAvvFYeiJTIV7J-GcM17Jwo15RBizp-d"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Area: Split Screen -->
+<main class="max-w-container-max mx-auto px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-xl py-lg">
+<!-- Left Column: Form Editor (5 Cols) -->
+<section class="lg:col-span-5 h-[calc(100vh-160px)] flex flex-col gap-lg">
+<!-- Editor Header & AI Action -->
+<div class="flex flex-col gap-md">
+<div class="flex justify-between items-end">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Build Your Future</h1>
+<div class="flex gap-sm">
+<button class="bg-surface-container-high text-on-surface hover:bg-surface-variant transition-all px-md py-sm rounded-lg flex items-center gap-xs font-label-md text-label-md">
+<span class="material-symbols-outlined text-[20px]" data-icon="save">save</span>
+                            Save Draft
+                        </button>
+</div>
+</div>
+<!-- AI Optimizer Panel -->
+<div class="bg-primary-fixed/20 border border-primary/10 rounded-xl p-md flex flex-col gap-sm relative overflow-hidden">
+<div class="flex justify-between items-center z-10">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-md text-label-md text-primary">AI Resume Optimizer</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">ATS Score:</span>
+<span class="font-bold text-primary" id="ats-score">84%</span>
+</div>
+</div>
+<button class="w-full bg-primary-container text-white py-sm rounded-lg font-label-md text-label-md hover:shadow-lg transition-all active:scale-95 flex justify-center items-center gap-sm" onclick="simulateAI()">
+<span id="ai-btn-text">Optimize with AI</span>
+</button>
+<div class="hidden absolute bottom-0 left-0 h-1 w-full shimmer" id="ai-progress"></div>
+</div>
+</div>
+<!-- Scrollable Form -->
+<div class="editor-scroll overflow-y-auto flex-1 pr-sm flex flex-col gap-xl">
+<!-- Template Carousel -->
+<div class="flex flex-col gap-sm">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Choose Template</label>
+<div class="flex gap-md overflow-x-auto pb-sm">
+<button class="flex-shrink-0 w-32 aspect-[3/4] rounded-lg border-2 border-primary bg-white shadow-md relative group">
+<div class="absolute inset-0 bg-primary/5 rounded-md"></div>
+<span class="absolute bottom-2 left-2 font-label-sm text-label-sm text-primary">Professional</span>
+<div class="p-2 flex flex-col gap-1">
+<div class="w-full h-1 bg-surface-container-highest"></div>
+<div class="w-2/3 h-1 bg-surface-container-highest"></div>
+<div class="w-full h-1 bg-surface-container-highest mt-2"></div>
+</div>
+</button>
+<button class="flex-shrink-0 w-32 aspect-[3/4] rounded-lg border border-outline-variant bg-white hover:border-primary/50 transition-all p-2 flex flex-col gap-1">
+<div class="w-full h-2 bg-surface-container-low mb-2"></div>
+<div class="grid grid-cols-2 gap-1">
+<div class="h-1 bg-surface-container-highest"></div>
+<div class="h-1 bg-surface-container-highest"></div>
+</div>
+<span class="mt-auto font-label-sm text-label-sm text-on-surface-variant">Modern</span>
+</button>
+<button class="flex-shrink-0 w-32 aspect-[3/4] rounded-lg border border-outline-variant bg-white hover:border-primary/50 transition-all p-2 flex flex-col gap-1">
+<div class="w-full h-full border border-dashed border-outline-variant rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-outline" data-icon="palette">palette</span>
+</div>
+<span class="mt-auto font-label-sm text-label-sm text-on-surface-variant">Creative</span>
+</button>
+</div>
+</div>
+<!-- Section: Personal Info -->
+<div class="bg-white border border-outline-variant rounded-xl p-lg flex flex-col gap-md shadow-sm">
+<div class="flex items-center gap-sm border-b border-outline-variant pb-sm">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Personal Information</h2>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Full Name</label>
+<input class="w-full rounded-lg border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/10 transition-all font-body-md text-body-md" type="text" value="Alex Rivera"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Job Title</label>
+<input class="w-full rounded-lg border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/10 transition-all font-body-md text-body-md" type="text" value="Senior Product Designer"/>
+</div>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Email Address</label>
+<input class="w-full rounded-lg border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/10 transition-all font-body-md text-body-md" type="email" value="alex.rivera@gigflow.ai"/>
+</div>
+</div>
+<!-- Section: Experience -->
+<div class="bg-white border border-outline-variant rounded-xl p-lg flex flex-col gap-md shadow-sm">
+<div class="flex justify-between items-center border-b border-outline-variant pb-sm">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="work">work</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Experience</h2>
+</div>
+<button class="text-primary hover:bg-primary/5 p-1 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+</button>
+</div>
+<div class="p-md bg-surface-container-low rounded-lg border border-primary/10 relative">
+<button class="absolute top-2 right-2 text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+</button>
+<div class="font-label-md text-label-md text-primary">Senior Product Designer</div>
+<div class="text-body-sm text-on-surface-variant mb-sm">TechCorp Systems • 2021 - Present</div>
+<p class="text-body-sm line-clamp-2">Led the redesign of the core mobile application, resulting in a 40% increase in daily active users and improved retention...</p>
+</div>
+<div class="p-md bg-white border border-outline-variant rounded-lg">
+<div class="font-label-md text-label-md text-on-surface">UI Designer</div>
+<div class="text-body-sm text-on-surface-variant">CreativAgency • 2018 - 2021</div>
+</div>
+</div>
+<!-- Section: Skills -->
+<div class="bg-white border border-outline-variant rounded-xl p-lg flex flex-col gap-md shadow-sm">
+<div class="flex items-center gap-sm border-b border-outline-variant pb-sm">
+<span class="material-symbols-outlined text-primary" data-icon="psychology">psychology</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Skills</h2>
+</div>
+<div class="flex flex-wrap gap-sm">
+<span class="bg-surface-container-highest px-md py-xs rounded-full text-on-surface-variant text-body-sm flex items-center gap-xs">
+                            Product Design
+                            <button class="material-symbols-outlined text-[14px]" data-icon="close">close</button>
+</span>
+<span class="bg-surface-container-highest px-md py-xs rounded-full text-on-surface-variant text-body-sm flex items-center gap-xs">
+                            User Research
+                            <button class="material-symbols-outlined text-[14px]" data-icon="close">close</button>
+</span>
+<span class="bg-surface-container-highest px-md py-xs rounded-full text-on-surface-variant text-body-sm flex items-center gap-xs">
+                            Figma
+                            <button class="material-symbols-outlined text-[14px]" data-icon="close">close</button>
+</span>
+<span class="bg-surface-container-highest px-md py-xs rounded-full text-on-surface-variant text-body-sm flex items-center gap-xs">
+                            Atomic Design
+                            <button class="material-symbols-outlined text-[14px]" data-icon="close">close</button>
+</span>
+<button class="border border-dashed border-primary text-primary px-md py-xs rounded-full text-body-sm hover:bg-primary/5 transition-colors">
+                            + Add Skill
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column: Live Preview (7 Cols) -->
+<section class="lg:col-span-7 flex flex-col gap-lg">
+<!-- Preview Controls -->
+<div class="flex justify-between items-center bg-white p-sm rounded-xl border border-outline-variant shadow-sm">
+<div class="flex gap-sm p-xs bg-surface-container-low rounded-lg">
+<button class="px-md py-1 bg-white shadow-sm rounded-md font-label-sm text-label-sm text-primary">Desktop</button>
+<button class="px-md py-1 text-on-surface-variant hover:text-primary transition-colors font-label-sm text-label-sm">Mobile</button>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<button class="material-symbols-outlined p-1 hover:bg-surface-variant rounded transition-colors" data-icon="zoom_out">zoom_out</button>
+<span class="font-label-sm text-label-sm w-12 text-center">100%</span>
+<button class="material-symbols-outlined p-1 hover:bg-surface-variant rounded transition-colors" data-icon="zoom_in">zoom_in</button>
+</div>
+<div class="h-6 w-px bg-outline-variant"></div>
+<button class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-md text-label-md flex items-center gap-sm hover:bg-primary-container transition-all active:scale-95 shadow-md">
+<span class="material-symbols-outlined text-[20px]" data-icon="picture_as_pdf">picture_as_pdf</span>
+                        Download PDF
+                    </button>
+</div>
+</div>
+<!-- The Resume Paper -->
+<div class="resume-preview-container bg-surface-dim/30 rounded-xl border border-outline-variant overflow-hidden flex justify-center p-xl relative">
+<!-- Decorative background elements -->
+<div class="absolute inset-0 pointer-events-none opacity-50">
+<div class="absolute top-10 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute bottom-10 right-10 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
+</div>
+<!-- Actual Resume Page -->
+<div class="w-full max-w-[595px] bg-white shadow-2xl h-fit min-h-full p-xxl flex flex-col gap-lg relative z-10 transition-all duration-500 ease-in-out" id="resume-page">
+<!-- Resume Header -->
+<header class="flex justify-between items-start border-b-2 border-primary pb-lg">
+<div class="flex flex-col">
+<h3 class="text-[32px] font-bold text-on-surface tracking-tight leading-none mb-2">Alex Rivera</h3>
+<p class="text-primary font-semibold text-body-lg">Senior Product Designer</p>
+</div>
+<div class="flex flex-col items-end text-right text-on-surface-variant text-body-sm gap-xs">
+<div class="flex items-center gap-xs">alex.rivera@gigflow.ai <span class="material-symbols-outlined text-[16px]" data-icon="mail">mail</span></div>
+<div class="flex items-center gap-xs">+1 (555) 012-3456 <span class="material-symbols-outlined text-[16px]" data-icon="call">call</span></div>
+<div class="flex items-center gap-xs">San Francisco, CA <span class="material-symbols-outlined text-[16px]" data-icon="location_on">location_on</span></div>
+</div>
+</header>
+<!-- Summary -->
+<section class="flex flex-col gap-sm">
+<h4 class="font-label-md text-label-md text-primary uppercase tracking-widest">Professional Summary</h4>
+<p class="text-on-surface-variant text-body-md leading-relaxed">
+                            Highly innovative Product Designer with 8+ years of experience in creating user-centric digital experiences. Proven track record of increasing engagement by 40% through intuitive design systems and deep user research. Expert in Figma, AI integration, and cross-functional leadership.
+                        </p>
+</section>
+<!-- Experience -->
+<section class="flex flex-col gap-md">
+<h4 class="font-label-md text-label-md text-primary uppercase tracking-widest">Experience</h4>
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-baseline">
+<span class="font-bold text-on-surface text-body-lg">TechCorp Systems</span>
+<span class="text-on-surface-variant text-body-sm italic">2021 - Present</span>
+</div>
+<div class="text-primary font-medium text-body-md">Senior Product Designer</div>
+<ul class="list-disc list-outside ml-5 text-on-surface-variant text-body-md space-y-1 mt-1">
+<li>Spearheaded the design of AI-driven analytics dashboards for enterprise clients.</li>
+<li>Reduced time-to-market for new features by 25% through the implementation of a centralized design system.</li>
+<li>Mentored a team of 4 junior designers and established UX research best practices.</li>
+</ul>
+</div>
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-baseline">
+<span class="font-bold text-on-surface text-body-lg">CreativAgency</span>
+<span class="text-on-surface-variant text-body-sm italic">2018 - 2021</span>
+</div>
+<div class="text-primary font-medium text-body-md">UI Designer</div>
+<ul class="list-disc list-outside ml-5 text-on-surface-variant text-body-md space-y-1 mt-1">
+<li>Delivered 20+ successful projects for high-profile tech startups across fintech and e-commerce.</li>
+<li>Collaborated with engineers to ensure pixel-perfect implementation of responsive web designs.</li>
+</ul>
+</div>
+</section>
+<!-- Skills (Grid) -->
+<section class="flex flex-col gap-sm">
+<h4 class="font-label-md text-label-md text-primary uppercase tracking-widest">Skills &amp; Expertise</h4>
+<div class="grid grid-cols-2 gap-x-xl gap-y-1 text-on-surface-variant text-body-md">
+<div class="flex items-center gap-xs">
+<div class="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+                                Product Design
+                            </div>
+<div class="flex items-center gap-xs">
+<div class="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+                                Figma &amp; Design Systems
+                            </div>
+<div class="flex items-center gap-xs">
+<div class="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+                                User Research
+                            </div>
+<div class="flex items-center gap-xs">
+<div class="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+                                Prototyping
+                            </div>
+</div>
+</section>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-inverse-surface w-full py-xl mt-xxl border-t border-outline-variant">
+<div class="max-w-container-max mx-auto px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-xl">
+<div class="flex flex-col gap-md">
+<span class="font-headline-lg text-headline-lg text-primary">GigFlow AI</span>
+<p class="text-on-surface-variant font-body-sm text-body-sm">Empowering your career journey with artificial intelligence and precision tools.</p>
+</div>
+<div class="flex flex-col gap-sm">
+<span class="font-label-md text-label-md text-on-surface">Resources</span>
+<div class="flex flex-wrap gap-md">
+<a class="text-on-surface-variant hover:text-primary transition-opacity font-body-sm text-body-sm" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity font-body-sm text-body-sm" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity font-body-sm text-body-sm" href="#">Support</a>
+</div>
+</div>
+<div class="flex flex-col gap-sm md:items-end">
+<span class="font-label-sm text-label-sm text-on-surface-variant">© 2024 GigFlow AI. All rights reserved.</span>
+<div class="flex gap-md">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors" data-icon="language">language</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors" data-icon="share">share</span>
+</div>
+</div>
+</div>
+</footer>
+<!-- Micro-Interactions Script -->
+<script>
+        function simulateAI() {
+            const btn = document.getElementById('ai-btn-text');
+            const progress = document.getElementById('ai-progress');
+            const scoreEl = document.getElementById('ats-score');
+            
+            progress.classList.remove('hidden');
+            btn.innerText = 'Analyzing Content...';
+            
+            // Step 1: Scan
+            setTimeout(() => {
+                btn.innerText = 'Optimizing Keywords...';
+            }, 1000);
+
+            // Step 2: Scoring
+            setTimeout(() => {
+                btn.innerText = 'Refining Layout...';
+                scoreEl.innerText = '92%';
+                scoreEl.classList.add('text-green-600', 'scale-110');
+            }, 2500);
+
+            // Step 3: Done
+            setTimeout(() => {
+                btn.innerText = 'Optimized Successfully';
+                progress.classList.add('hidden');
+                setTimeout(() => {
+                    btn.innerText = 'Optimize with AI';
+                    scoreEl.classList.remove('scale-110');
+                }, 2000);
+            }, 4000);
+        }
+
+        // Handle Resume Preview Scaling on window resize
+        function adjustZoom() {
+            const container = document.querySelector('.resume-preview-container');
+            const page = document.getElementById('resume-page');
+            const scale = Math.min(1, (container.clientHeight - 48) / page.offsetHeight);
+            // In a real app we would apply transform: scale(scale) here
+        }
+        window.addEventListener('resize', adjustZoom);
+        
+        // Form field focus effects for the preview
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('input', (e) => {
+                // Real-time sync would go here
+                console.log('Syncing:', e.target.value);
+            });
+        });
+    </script>
+</body></html>

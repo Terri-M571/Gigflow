@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GigFlow | Where Opportunities Flow to You</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "surface-container-low": "#f1f4f7",
+                "secondary-fixed": "#ffdcc1",
+                "surface-container-lowest": "#ffffff",
+                "on-secondary": "#ffffff",
+                "on-tertiary-container": "#ffb9a4",
+                "on-error-container": "#93000a",
+                "surface-variant": "#dbe3eb",
+                "on-tertiary-fixed": "#3a0b00",
+                "tertiary-fixed-dim": "#ffb59e",
+                "primary": "#0056d2",
+                "inverse-primary": "#b4c5ff",
+                "on-surface": "#191c1e",
+                "on-secondary-fixed-variant": "#6c3a00",
+                "on-surface-variant": "#43474e",
+                "on-background": "#191c1e",
+                "surface-tint": "#0056d2",
+                "tertiary-fixed": "#ffdbd0",
+                "on-secondary-fixed": "#2e1500",
+                "secondary-fixed-dim": "#ffb779",
+                "inverse-on-surface": "#f0f0f3",
+                "background": "#f7fafd",
+                "surface-container": "#e7eaee",
+                "primary-container": "#d7e2ff",
+                "surface": "#f7fafd",
+                "primary-fixed": "#dbe1ff",
+                "secondary": "#ff8c00",
+                "on-primary": "#ffffff",
+                "on-primary-fixed-variant": "#0044a7",
+                "inverse-surface": "#2e3133",
+                "on-tertiary": "#ffffff",
+                "primary-fixed-dim": "#adc6ff",
+                "error": "#ba1a1a",
+                "on-secondary-container": "#2e1500",
+                "tertiary-container": "#9c2e02",
+                "surface-bright": "#f7fafd",
+                "outline-variant": "#c3c6cf",
+                "surface-dim": "#d7dadd",
+                "error-container": "#ffdad6",
+                "tertiary": "#a93610",
+                "on-error": "#ffffff",
+                "on-primary-container": "#001a43",
+                "outline": "#73777f",
+                "surface-container-highest": "#e1e2e5",
+                "surface-container-high": "#ebecee",
+                "on-tertiary-fixed-variant": "#842500",
+                "on-primary-fixed": "#00174b",
+                "secondary-container": "#ff8c00"
+              },
+              "borderRadius": {
+                "DEFAULT": "0.5rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+              },
+              "spacing": {
+                "margin-mobile": "16px",
+                "sm": "8px",
+                "xs": "4px",
+                "unit": "4px",
+                "margin-desktop": "32px",
+                "md": "16px",
+                "xxl": "48px",
+                "container-max": "1280px",
+                "lg": "24px",
+                "xl": "32px",
+                "gutter": "24px"
+              },
+              "fontFamily": {
+                "sans": ["Hanken Grotesk", "sans-serif"],
+                "label-md": ["Hanken Grotesk"],
+                "body-sm": ["Hanken Grotesk"],
+                "headline-md": ["Hanken Grotesk"],
+                "body-lg": ["Hanken Grotesk"],
+                "body-md": ["Hanken Grotesk"],
+                "display-lg-mobile": ["Hanken Grotesk"],
+                "label-sm": ["Hanken Grotesk"],
+                "display-lg": ["Hanken Grotesk"],
+                "headline-lg": ["Hanken Grotesk"]
+              },
+              "fontSize": {
+                "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .typing-effect::after {
+            content: '|';
+            animation: blink 0.7s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="bg-surface-container-lowest/80 backdrop-blur-md docked full-width top-0 sticky z-50 shadow-sm border-b border-outline-variant">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-xl">
+<div class="h-10">
+<img alt="GigFlow Logo" class="h-full w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlcz80LHcSYr4n-spzVJDgvAd72c2ASfrH6OBYA4u0Fl7_-El6qner8Ydb4SSSZiTrhi6AQMjQiEuXBjv1ZrOGwpf4SbcQbZXWGlzf97QonTJWhcQJO5DcooMmWVoSuqNJMKu7xJWsAE3__egxfN2DuwBEPQLBobtjgy9AzFMzVSJ4mmvaiQrhI-35MSNEXqv9wh9fSlv9rin8GdKTgbhL8IGdjhvPH1mdw_pBbpT49gobIexjWDhmTf2JTZcJwNkCFw"/>
+</div>
+<nav class="hidden md:flex gap-lg">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md transition-colors" href="#">Home</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors font-label-md text-label-md" href="#">Jobs</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors font-label-md text-label-md" href="#">Freelance</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors font-label-md text-label-md" href="#">Resume Builder</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors font-label-md text-label-md" href="#">Learning Hub</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-xs hover:bg-surface-variant rounded-full transition-all active:scale-90">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-outline-variant scale-95 active:scale-90 transition-transform cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-McpRx1yuPgxpS_tSkdJjKZMG-X5msmkvOtILPl13aDd2lNepRmLbNOobLhbi1AYCMWbc57IhcEmukqKRgiM8ijGIOGmkiLAsJv0oYKPWGC-gDfxLPOPVgnUAWhhsfVkCiKDWoGJ92c2CGgCq1ETxr0aF7nMWCt3ANb_Qzo_H7CXJ28MYKnYxNK3k4GiKCTraUl-nVfEde7XG8S7zlVay7NoOK0-UE-ztcWex86oqL4PWJs6POxKp"/>
+</div>
+</div>
+</div>
+</header>
+<main>
+<!-- Hero Section -->
+<section class="relative min-h-[800px] flex items-center justify-center pt-xxl pb-xxl overflow-hidden bg-gradient-to-br from-primary via-primary to-blue-700">
+<div class="relative z-10 max-w-container-max mx-auto px-margin-desktop text-center">
+<div class="inline-block px-md py-xs rounded-full bg-on-primary/10 border border-on-primary/20 backdrop-blur-sm mb-lg">
+<span class="text-on-primary font-label-sm uppercase tracking-widest">AI-Powered Career Evolution</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-primary mb-md max-w-4xl mx-auto leading-tight">
+                    Your Future is Flowing. <br/>
+<span class="typing-effect text-secondary" id="typing-tagline"></span>
+</h1>
+<p class="text-on-primary/80 font-body-lg text-body-lg mb-xxl max-w-2xl mx-auto">
+                    The premium ecosystem for high-growth professionals. Connect with global leaders using our intelligent career matching engine.
+                </p>
+<!-- Search Container -->
+<div class="max-w-3xl mx-auto glass-card p-sm rounded-xl border border-white/20 shadow-xl">
+<div class="flex flex-col md:flex-row gap-sm items-center">
+<div class="flex-1 flex items-center bg-white rounded-lg px-md h-14 border border-outline-variant focus-within:ring-2 focus-within:ring-primary/20 transition-all w-full">
+<span class="material-symbols-outlined text-outline">search</span>
+<input class="flex-1 border-none focus:ring-0 bg-transparent text-on-surface font-body-md placeholder:text-outline" placeholder="Job title, skills, or projects..." type="text"/>
+</div>
+<div class="flex-1 flex items-center bg-white rounded-lg px-md h-14 border border-outline-variant focus-within:ring-2 focus-within:ring-primary/20 transition-all w-full">
+<span class="material-symbols-outlined text-outline">location_on</span>
+<input class="flex-1 border-none focus:ring-0 bg-transparent text-on-surface font-body-md placeholder:text-outline" placeholder="Location or Remote" type="text"/>
+</div>
+<button class="bg-secondary text-on-secondary px-xl h-14 rounded-lg font-bold hover:brightness-110 transition-all active:scale-95 flex items-center justify-center gap-xs w-full md:w-auto">
+<span>Explore</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats Section -->
+<section class="py-xl bg-surface-container-low border-b border-outline-variant">
+<div class="max-w-container-max mx-auto px-margin-desktop">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-xl text-center">
+<div class="p-lg">
+<p class="font-display-lg text-display-lg text-primary mb-xs" id="stat-jobs">0</p>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Jobs Found Today</p>
+</div>
+<div class="p-lg">
+<p class="font-display-lg text-display-lg text-primary mb-xs" id="stat-freelancers">0</p>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Active Freelancers</p>
+</div>
+<div class="p-lg">
+<p class="font-display-lg text-display-lg text-primary mb-xs" id="stat-companies">0</p>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Global Partners</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured Jobs Section -->
+<section class="py-xxl">
+<div class="max-w-container-max mx-auto px-margin-desktop">
+<div class="flex justify-between items-end mb-xl">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Top Featured Jobs</h2>
+<p class="text-on-surface-variant font-body-md">Hand-picked premium roles for top-tier talent.</p>
+</div>
+<button class="text-secondary font-bold flex items-center gap-xs hover:gap-sm transition-all">
+<span>View All</span>
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<div class="flex gap-lg overflow-x-auto hide-scrollbar pb-lg -mx-4 px-4">
+<!-- Job Card 1 -->
+<div class="min-w-[320px] md:min-w-[400px] bg-white p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-lg">
+<div class="w-14 h-14 rounded-lg bg-surface-container overflow-hidden p-sm">
+<img alt="Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAf4hySZerAbzCcJ_kM-_XSJjrdMrcACMVozxxJYW5CTwIOJS78__WRd5lCUGimCWpVmNGW1SE5DRGr8iJrwLti3fW6GtrW8LxiEctN99oMR0IFbEZFhKAJNN0PZouEPDOX-XZheq5HAqTk30Md8dwzMuxKIgxemswg5Db7F8LzqRL0N9gOA53pDQyEFQ8JXgpLdc_x3uPmSkr_w3WD06T8mVWx6Gx_EAU41mNn-We8cPW0eqMPJIdr"/>
+</div>
+<span class="px-md py-xs rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm">New</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs group-hover:text-primary transition-colors">Senior AI Research Engineer</h3>
+<p class="text-on-surface-variant font-body-sm mb-lg">NeuroLogic AI • Remote</p>
+<div class="flex flex-wrap gap-xs mb-lg">
+<span class="bg-surface-container-low text-primary px-sm py-xs rounded-lg font-label-sm">PyTorch</span>
+<span class="bg-surface-container-low text-primary px-sm py-xs rounded-lg font-label-sm">LLMs</span>
+<span class="bg-surface-container-low text-primary px-sm py-xs rounded-lg font-label-sm">$180k - $240k</span>
+</div>
+<button class="w-full bg-secondary text-on-secondary py-md rounded-lg font-bold hover:brightness-110 transition-all">Apply Now</button>
+</div>
+<!-- Job Card 2 -->
+<div class="min-w-[320px] md:min-w-[400px] bg-white p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-lg">
+<div class="w-14 h-14 rounded-lg bg-surface-container overflow-hidden p-sm">
+<img alt="Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5lv45Cj1zsVdut0bvgiJuwaok2q6QLI6kS1J_xbb2U33pSKfBHLoKdjZpskOtl6loDF5kvFJVbB-BIW6IBL4dssD9verhZxjl3d57dGcMhPnmEd8NsX9QY6nJqysj4JTprtWo0cLQ0VF-2cm6Q1RPsoBdmht2dh7cUrd77KYlFbR89YAauQ1sgzvH7rKcEKhIGG4LHidW4QVzvjDRr2WacpIqmFgBG42VtCwPZBbKpJJgT1Qw-css"/>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs group-hover:text-primary transition-colors">VP of Product Design</h3>
+<p class="text-on-surface-variant font-body-sm mb-lg">Stellar Finance • New York, NY</p>
+<div class="flex flex-wrap gap-xs mb-lg">
+<span class="bg-surface-container-low text-primary px-sm py-xs rounded-lg font-label-sm">Leadership</span>
+<span class="bg-surface-container-low text-primary px-sm py-xs rounded-lg font-label-sm">Strategy</span>
+<span class="bg-surface-container-low text-primary px-sm py-xs rounded-lg font-label-sm">$210k+</span>
+</div>
+<button class="w-full bg-secondary text-on-secondary py-md rounded-lg font-bold hover:brightness-110 transition-all">Apply Now</button>
+</div>
+<!-- Job Card 3 -->
+<div class="min-w-[320px] md:min-w-[400px] bg-white p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-lg">
+<div class="w-14 h-14 rounded-lg bg-surface-container overflow-hidden p-sm">
+<img alt="Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBODYkmqQRs_WT_UDlC_xtnqMYKq-P1CEjWaY47oB32O-YFXsuvixqeLeItj4IS6TgeM0bYhpY2Y9YYXVW03w7nQIXPi3i1b8-uRMjt-9a2mQa64TxD5IVKl8u_mNEl0OpVooqxvpWljzptuWWH8M-Mt_bsGKhZo1EmAZ5QvB9IcqQxH6Zci9sgNA2mvn_Ic43EUl10Vx071l02VKKvLuvaEWNnp2z9dNHk9aXkg55AapUEGM-DZf1v"/>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs group-hover:text-primary transition-colors">Staff Frontend Architect</h3>
+<p class="text-on-surface-variant font-body-sm mb-lg">BioStream • Remote (GMT-5)</p>
+<div class="flex flex-wrap gap-xs mb-lg">
+<span class="bg-surface-container-low text-primary px-sm py-xs rounded-lg font-label-sm">React</span>
+<span class="bg-surface-container-low text-primary px-sm py-xs rounded-lg font-label-sm">Next.js</span>
+<span class="bg-surface-container-low text-primary px-sm py-xs rounded-lg font-label-sm">$175k - $220k</span>
+</div>
+<button class="w-full bg-secondary text-on-secondary py-md rounded-lg font-bold hover:brightness-110 transition-all">Apply Now</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Value Proposition Section -->
+<section class="py-xxl bg-surface-container-lowest">
+<div class="max-w-container-max mx-auto px-margin-desktop">
+<div class="text-center mb-xxl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-md">Why Choose GigFlow?</h2>
+<p class="text-on-surface-variant font-body-lg text-body-lg max-w-2xl mx-auto">We leverage proprietary AI to bridge the gap between human potential and career opportunity.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
+<div class="p-lg rounded-xl border border-outline-variant hover:border-secondary/30 transition-all bg-white">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mb-lg">
+<span class="material-symbols-outlined text-secondary text-4xl">auto_awesome</span>
+</div>
+<h4 class="font-headline-md text-headline-md mb-md text-on-surface">AI Resume Scoring</h4>
+<p class="text-on-surface-variant font-body-md mb-lg">Get real-time feedback on how your resume performs against specific job descriptions before you hit apply.</p>
+<div class="h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary animate-pulse" style="width: 85%"></div>
+</div>
+</div>
+<div class="p-lg rounded-xl border border-outline-variant hover:border-secondary/30 transition-all bg-white">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mb-lg">
+<span class="material-symbols-outlined text-secondary text-4xl">check_circle</span>
+</div>
+<h4 class="font-headline-md text-headline-md mb-md text-on-surface">ATS Checker</h4>
+<p class="text-on-surface-variant font-body-md mb-lg">Ensure your profile passes through Applicant Tracking Systems with our intelligent keyword optimization engine.</p>
+<div class="flex gap-xs">
+<span class="w-3 h-3 rounded-full bg-secondary/20"></span>
+<span class="w-3 h-3 rounded-full bg-secondary/40"></span>
+<span class="w-3 h-3 rounded-full bg-secondary/60"></span>
+</div>
+</div>
+<div class="p-lg rounded-xl border border-outline-variant hover:border-secondary/30 transition-all bg-white">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mb-lg">
+<span class="material-symbols-outlined text-secondary text-4xl">moving</span>
+</div>
+<h4 class="font-headline-md text-headline-md mb-md text-on-surface">Learning Path</h4>
+<p class="text-on-surface-variant font-body-md mb-lg">Personalized skill development roadmaps based on market demand and your desired career trajectory.</p>
+<span class="text-secondary font-label-sm font-bold border-b border-secondary cursor-pointer">Explore Paths</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials -->
+<section class="py-xxl">
+<div class="max-w-container-max mx-auto px-margin-desktop">
+<h2 class="font-headline-lg text-headline-lg text-on-surface text-center mb-xxl">Success Stories</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+<div class="bg-white p-xl rounded-2xl shadow-sm border border-outline-variant relative">
+<span class="material-symbols-outlined text-secondary/10 text-6xl absolute top-4 right-4">format_quote</span>
+<div class="flex items-center gap-md mb-lg">
+<div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtFFVzKJBSToZxW40LYsfypENkAShM7SSa6z1EOHHU_6ic3MIhju97bFWh3uO0EnbXFSkVku0DEG7DCr7zHsEm6vi72wqkdvoTlE5ih57qHrW7bf1vdmhENaEcPbK9xv2ULzhdHvkFbsMEfIedO8r3KDWCSRhkc3BgITbvmN1jyFBm_l9WKWEzlLUVEmXKY_nxo-KAOGPBYXvlU6b8ZRkFnAVfTA7ynQawNtvfYJ8YoAl0IBqsEO19"/>
+</div>
+<div>
+<h5 class="font-label-md text-label-md text-on-surface">Marcus Chen</h5>
+<p class="text-on-surface-variant text-label-sm">Creative Director @ Apex</p>
+</div>
+</div>
+<p class="text-on-surface-variant font-body-md italic">"GigFlow's AI matching found me a role that fits my creative vision perfectly. The transition was seamless and the platform is incredibly intuitive."</p>
+</div>
+<div class="bg-white p-xl rounded-2xl shadow-sm border border-outline-variant relative">
+<span class="material-symbols-outlined text-secondary/10 text-6xl absolute top-4 right-4">format_quote</span>
+<div class="flex items-center gap-md mb-lg">
+<div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiL7RjE3aj4KVZM8KmEQFgVag44EJYYPwdAb0NF3KZ45tQe7_2nbazc8mqaRLpMaJ9KWwoTRVFdOf57Uqy3BylONbwSJR5VtFDeCkjzrC2hb1_5Tq2IlAtL0EdggS-ncgRoYZ6DSSshvyOli1xZNyGcF-ixk8b0Bqwh8w7QKzGz3ocydumVbZ466JqNNXe2k8b8vvuZbdm3K69PCVAGK--dMqIyPkKrweQ3ZrGSwb5kPUqknVai7go"/>
+</div>
+<div>
+<h5 class="font-label-md text-label-md text-on-surface">Sarah J.</h5>
+<p class="text-on-surface-variant text-label-sm">Fullstack Developer</p>
+</div>
+</div>
+<p class="text-on-surface-variant font-body-md italic">"As a freelancer, finding steady, high-quality projects is tough. GigFlow streamlined my pipeline and helped me land 3 premium contracts in a month."</p>
+</div>
+<div class="bg-white p-xl rounded-2xl shadow-sm border border-outline-variant relative">
+<span class="material-symbols-outlined text-secondary/10 text-6xl absolute top-4 right-4">format_quote</span>
+<div class="flex items-center gap-md mb-lg">
+<div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKb0zU8fy43NfFlR5veplMVkRT4NWi2yt4h0WmEknVuqWWLKrNu3nXVODbx3a1JgmbXJBaEhp9H0MplDPWyDtSC5F4jXw9mX-1A1oJKJT1UcGjkxuvmAqk_Kh_me7j_R5xfIRXfGhdzy2FRufx0O0bTsCetEzfl8D-6wWj_erNkDzRUetebm7UAAzpChooIfEpnjVJpg_juiitR71SpYdh2xlVTJT7GtEY6TYKVLTD8ChQBCUy1ubU"/>
+</div>
+<div>
+<h5 class="font-label-md text-label-md text-on-surface">David Okafor</h5>
+<p class="text-on-surface-variant text-label-sm">Operations Lead</p>
+</div>
+</div>
+<p class="text-on-surface-variant font-body-md italic">"The Resume Scoring tool is a game changer. It gave me the confidence to apply for leadership roles I previously thought were out of reach."</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-inverse-surface w-full py-xl mt-xxl">
+<div class="max-w-container-max mx-auto px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-xl">
+<div class="flex flex-col gap-md">
+<div class="h-10">
+<img alt="GigFlow Logo" class="h-full w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwf6R4XeDCwIfDPFI3CZ_OBICvQKdgKKpGjVOjnSp2zvKC0coFgo0RpEkh2aD208WxqN24OGvC2hX_C39sR3J0-Oc34ssUrhw-bKrzwxM0CycS5HACG1_UzDQ9kwKjMuAuP3NlBlfCw36-Yp-8QbIFfMq5_YYpCWHvpvhPGoFYocytjNq1TpRtSf4Kmcd-3Mf6gGt63fGBjpToZ_sXmqJa8evf_FD9e53QX1NjAMBVLriWyS-6BqVEWAGtcnPxxN6P8g"/>
+</div>
+<p class="text-on-surface-variant font-body-sm text-body-sm max-w-xs">Building the intelligent infrastructure for the future of work. Empowering professionals to flow towards their greatest potential.</p>
+<div class="flex gap-md mt-sm">
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined">public</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined">alternate_email</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-sm">
+<h6 class="font-label-md text-label-md text-on-surface mb-xs">Platform</h6>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Jobs Board</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Freelance Marketplace</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Resume AI</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Skill Assessments</a>
+</div>
+<div class="flex flex-col gap-sm">
+<h6 class="font-label-md text-label-md text-on-surface mb-xs">Company</h6>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Support</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Contact Us</a>
+<p class="text-on-surface-variant font-body-sm text-body-sm mt-md">© 2024 GigFlow AI. All rights reserved.</p>
+</div>
+</div>
+</footer>
+<script>
+        // Typing Effect Logic
+        const text = "Where Opportunities Flow to You";
+        const target = document.getElementById('typing-tagline');
+        let index = 0;
+
+        function type() {
+            if (index < text.length) {
+                target.textContent += text.charAt(index);
+                index++;
+                setTimeout(type, 100);
+            }
+        }
+        window.addEventListener('load', type);
+
+        // Animated Counters Logic
+        function animateCounter(id, targetValue, duration) {
+            const element = document.getElementById(id);
+            let start = 0;
+            const increment = targetValue / (duration / 16);
+            
+            const timer = setInterval(() => {
+                start += increment;
+                if (start >= targetValue) {
+                    element.textContent = targetValue.toLocaleString() + '+';
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(start).toLocaleString() + '+';
+                }
+            }, 16);
+        }
+
+        // Intersection Observer for triggering stats
+        const observerOptions = { threshold: 0.5 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter('stat-jobs', 12450, 2000);
+                    animateCounter('stat-freelancers', 85000, 2500);
+                    animateCounter('stat-companies', 2400, 1500);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        observer.observe(document.getElementById('stat-jobs').parentElement.parentElement);
+    </script>
+</body></html>

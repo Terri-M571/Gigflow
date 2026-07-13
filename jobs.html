@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - Career Board</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in" style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- Top search section -->
+            <div class="card" style="padding: 20px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                    <div style="flex-grow: 1; min-width: 250px; background-color: var(--surface-low); border-radius: var(--border-radius); display: flex; align-items: center; padding: 0 16px; height: 46px;">
+                        <span class="material-symbols-outlined" style="color: var(--text-muted); margin-right: 8px;">search</span>
+                        <input type="text" id="job-search-input" placeholder="Search jobs by title, skills or keywords..." style="border: none; outline: none; background: transparent; width: 100%; color: var(--text-color); font-weight: 500;">
+                    </div>
+                    <div style="width: 220px; background-color: var(--surface-low); border-radius: var(--border-radius); display: flex; align-items: center; padding: 0 16px; height: 46px;">
+                        <span class="material-symbols-outlined" style="color: var(--text-muted); margin-right: 8px;">location_on</span>
+                        <input type="text" id="job-location-input" placeholder="Location" style="border: none; outline: none; background: transparent; width: 100%; color: var(--text-color); font-weight: 500;">
+                    </div>
+                    <label class="checkbox-label" style="background-color: var(--surface-low); padding: 10px 16px; border-radius: var(--border-radius); height: 46px;">
+                        <input type="checkbox" id="remote-only-toggle">
+                        <span>Remote Only</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Double-column layout: filters + jobs list -->
+            <div class="dashboard-grid">
+                <!-- Left Sidebar Filters -->
+                <div class="card" style="padding: 24px; align-self: start; display: flex; flex-direction: column; gap: 24px;">
+                    <div>
+                        <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">Job Type</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label class="checkbox-label"><input type="checkbox" name="job-type" value="Full-time"> Full-time</label>
+                            <label class="checkbox-label"><input type="checkbox" name="job-type" value="Contract"> Contract</label>
+                            <label class="checkbox-label"><input type="checkbox" name="job-type" value="Part-time"> Part-time</label>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">Experience Level</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label class="checkbox-label"><input type="checkbox" name="experience" value="Senior"> Senior</label>
+                            <label class="checkbox-label"><input type="checkbox" name="experience" value="Mid"> Mid-Level</label>
+                            <label class="checkbox-label"><input type="checkbox" name="experience" value="Junior"> Entry-Level</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Listings Grid -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="font-size: 1.3rem; font-weight: 800;">Available Career Roles</h2>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 20px;" id="jobs-board-list">
+                        <!-- Injected dynamically via jobs.js -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jobs.js"></script>
+</body>
+</html>

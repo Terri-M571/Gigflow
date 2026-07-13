@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - AI ATS Scorecard</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in" style="display: flex; flex-direction: column; gap: 24px;">
+            <div style="margin-bottom: 8px;">
+                <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">AI ATS Resume Scorecard</h1>
+                <p style="color: var(--text-muted);">Compare your resume against target job scopes to optimize your match rate</p>
+            </div>
+
+            <!-- Double Columns: upload zone + JD inputs -->
+            <div class="dashboard-grid">
+                <!-- Left Details Form -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <!-- JD Textarea Input -->
+                    <div class="card" style="padding: 24px;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 12px;">1. Paste Target Job Description</h3>
+                        <textarea class="form-control" id="ats-job-desc" rows="6" placeholder="Paste the full job post requirements, skills, and details here..."></textarea>
+                    </div>
+
+                    <!-- Upload zone -->
+                    <div class="card" style="padding: 24px;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 12px;">2. Upload Your Resume</h3>
+                        <div class="upload-zone" id="ats-upload-zone" onclick="document.getElementById('ats-file-input').click()">
+                            <span class="material-symbols-outlined upload-icon">cloud_upload</span>
+                            <h4>Drag & Drop your resume PDF here</h4>
+                            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; margin-bottom: 12px;">Supports PDF, DOCX files up to 5MB.</p>
+                            <span class="btn btn-outline" style="font-size: 0.8rem; padding: 6px 16px;">Browse File</span>
+                            <input type="file" id="ats-file-input" accept=".pdf,.docx" style="display: none;" onchange="handleATSResumeSelected(this)">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary w-full" style="height: 48px; font-size: 1rem;" onclick="analyzeResumeATS()">Optimize Resume with AI</button>
+                </div>
+
+                <!-- Right Results Scorecard (Simulated hidden by default) -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="card" id="ats-results-panel" style="padding: 24px; display: none;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Analysis Results</h3>
+                        
+                        <!-- Circular progress score -->
+                        <div class="flex-center" style="flex-direction: column; gap: 8px; margin-bottom: 24px;">
+                            <div class="flex-center" style="width: 110px; height: 110px; border-radius: var(--border-radius-full); border: 8px solid var(--primary-container); font-size: 2rem; font-weight: 800; color: var(--primary);" id="ats-score-circle">
+                                0%
+                            </div>
+                            <span style="font-size: 0.9rem; font-weight: 700;">Overall Match Rate</span>
+                        </div>
+
+                        <!-- Recommendations list -->
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <h4 style="font-size: 0.85rem; color: var(--error); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Missing Key Keywords</h4>
+                                <ul style="list-style: none; font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;" id="ats-missing-keywords">
+                                    <!-- Injected -->
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 0.85rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Formatting Insights</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0;" id="ats-formatting-review">No structural anomalies detected. High parser compatibility.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shimmer Loader placeholder -->
+                    <div class="card" id="ats-shimmer-loader" style="padding: 32px; display: none;">
+                        <div class="skeleton-line header shimmer-bg"></div>
+                        <div class="skeleton-line shimmer-bg"></div>
+                        <div class="skeleton-line shimmer-bg"></div>
+                        <div class="skeleton-line short shimmer-bg"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        let selectedFile = null;
+
+        // Drag & drop handlers
+        const zone = document.getElementById('ats-upload-zone');
+        if (zone) {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('dragover');
+            });
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    selectedFile = e.dataTransfer.files[0];
+                    zone.querySelector('h4').textContent = selectedFile.name;
+                    showToast('Resume file selected!', 'success');
+                }
+            });
+        }
+
+        function handleATSResumeSelected(input) {
+            if (input.files.length > 0) {
+                selectedFile = input.files[0];
+                zone.querySelector('h4').textContent = selectedFile.name;
+                showToast('Resume file selected!', 'success');
+            }
+        }
+
+        function analyzeResumeATS() {
+            const jd = document.getElementById('ats-job-desc').value.trim();
+            if (!jd) {
+                showToast('Please paste a target Job Description first', 'error');
+                return;
+            }
+            if (!selectedFile) {
+                showToast('Please upload or drop your resume file', 'error');
+                return;
+            }
+
+            // Show Shimmer Loader
+            const results = document.getElementById('ats-results-panel');
+            const loader = document.getElementById('ats-shimmer-loader');
+            
+            results.style.display = 'none';
+            loader.style.display = 'block';
+
+            setTimeout(() => {
+                loader.style.display = 'none';
+                results.style.display = 'block';
+
+                // Core logic calculations simulation
+                let score = 55;
+                const keywords = ['react', 'figma', 'next.js', 'leadership', 'analytics', 'performance', 'tailwindcss'];
+                const missing = [];
+
+                keywords.forEach(word => {
+                    if (jd.toLowerCase().includes(word)) {
+                        missing.push(word);
+                    }
+                });
+
+                // Compute score based on matching keywords
+                score += Math.min(30, missing.length * 5);
+                document.getElementById('ats-score-circle').textContent = `${score}%`;
+
+                const keywordsContainer = document.getElementById('ats-missing-keywords');
+                keywordsContainer.innerHTML = '';
+                if (missing.length === 0) {
+                    keywordsContainer.innerHTML = `<li><span class="material-symbols-outlined" style="color: var(--success); font-size: 14px; vertical-align: middle; margin-right: 4px;">check_circle</span> Perfect keywords compatibility!</li>`;
+                } else {
+                    missing.forEach(kw => {
+                        keywordsContainer.innerHTML += `
+                            <li style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                <span class="material-symbols-outlined" style="color: var(--error); font-size: 14px;">warning</span>
+                                <span style="font-weight: 600;">${kw.toUpperCase()}</span> - Missing in resume description
+                            </li>
+                        `;
+                    });
+                }
+
+                showToast('ATS Optimization Analysis Complete!', 'success');
+            }, 1800);
+        }
+    </script>
+</body>
+</html>

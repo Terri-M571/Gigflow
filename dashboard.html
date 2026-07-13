@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - User Dashboard</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in">
+            <!-- Welcome Banner -->
+            <section class="welcome-banner">
+                <div class="welcome-info">
+                    <h1 id="dashboard-greeting" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <span id="dashboard-greeting-text">Good Morning, there! ☀️</span>
+                    </h1>
+                    <p id="dashboard-welcome-sub">You're in the top 5% of candidates this week. Keep up the momentum!</p>
+                </div>
+                <div class="welcome-score-widget">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: #ffffff;">
+                        <span>Profile Completion</span>
+                        <span id="dashboard-profile-progress-text">85%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill shimmer-progress" id="dashboard-profile-progress-fill" style="width: 85%;"></div>
+                    </div>
+                    <p style="font-size: 0.75rem; margin-bottom: 0; color: rgba(255,255,255,0.7); font-weight: 500;">Add your portfolio projects to reach 100%</p>
+                </div>
+            </section>
+
+            <!-- Stats Grid -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">description</span>
+                    </div>
+                    <p>Active Applications</p>
+                    <h3 id="stat-active-applications">12</h3>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">calendar_today</span>
+                    </div>
+                    <p>Upcoming Interviews</p>
+                    <h3 id="stat-upcoming-interviews">3</h3>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </div>
+                    <p>Profile Views</p>
+                    <h3 id="stat-profile-views">1.2k</h3>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">psychology</span>
+                    </div>
+                    <p>Career Score</p>
+                    <h3 id="stat-career-score">942</h3>
+                </div>
+            </section>
+
+            <!-- Grid Layout -->
+            <div class="dashboard-grid">
+                <!-- Main Board Info Column -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <!-- Applications Card -->
+                    <div class="dashboard-section">
+                        <div class="dashboard-section-header">
+                            <h3 class="dashboard-section-title">Recent Applications</h3>
+                            <a href="application-tracker.html" class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; color: var(--primary);">View Tracker</a>
+                        </div>
+                        <div class="dashboard-section-body" id="dashboard-recent-applications">
+                            <!-- Injected dynamically via dashboard.js -->
+                        </div>
+                    </div>
+
+                    <!-- Recommended Opportunities -->
+                    <div>
+                        <h3 style="font-size: 1.15rem; margin-bottom: 16px;">Jobs Picked for You</h3>
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;" id="dashboard-recommended-jobs">
+                            <!-- Injected dynamically via dashboard.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Quick Links Column -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <!-- Quick Actions -->
+                    <div class="card" style="padding: 24px;">
+                        <h3 style="font-size: 0.85rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;">Quick Actions</h3>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button class="btn btn-outline w-full" style="justify-content: flex-start; padding: 12px 16px;" onclick="location.href='application-tracker.html'">
+                                <span class="material-symbols-outlined" style="color: var(--primary);">add_circle</span>
+                                <span>Track New Application</span>
+                            </button>
+                            <button class="btn btn-outline w-full" style="justify-content: flex-start; padding: 12px 16px;" onclick="location.href='resume-builder.html'">
+                                <span class="material-symbols-outlined" style="color: var(--primary);">edit_note</span>
+                                <span>Update Resume</span>
+                            </button>
+                            <button class="btn btn-outline w-full" style="justify-content: flex-start; padding: 12px 16px;" onclick="location.href='live-coach.html'">
+                                <span class="material-symbols-outlined" style="color: var(--primary);">person_search</span>
+                                <span>Find a Coach</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Insights -->
+                    <div class="card" style="background-color: var(--text-color); color: #ffffff; padding: 24px; position: relative; overflow: hidden; border: none;">
+                        <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.1;">
+                            <span class="material-symbols-outlined" style="font-size: 120px;">insights</span>
+                        </div>
+                        <div style="position: relative; z-index: 5;">
+                            <div style="display: flex; align-items: center; gap: 8px; color: var(--secondary); margin-bottom: 12px;">
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                                <h3 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 0;">AI Career Assistant</h3>
+                            </div>
+                            <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px;">Your profile matches 90% of Senior Design roles. Learning <b>Framer</b> could boost your hiring chances by 15%.</p>
+                            <button class="btn btn-secondary w-full" onclick="location.href='learning.html'">View Learning Path</button>
+                        </div>
+                    </div>
+
+                    <!-- Next Interview -->
+                    <div class="card" style="padding: 24px;">
+                        <h3 style="font-size: 0.9rem; margin-bottom: 16px;">Next Interview</h3>
+                        <div style="display: flex; gap: 16px;">
+                            <div class="flex-center" style="flex-direction: column; width: 64px; height: 64px; background-color: var(--secondary-container); color: var(--secondary); border-radius: var(--border-radius); font-weight: 800;">
+                                <span style="font-size: 0.75rem; text-transform: uppercase;">Oct</span>
+                                <span style="font-size: 1.4rem;">24</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 0.95rem; margin-bottom: 2px;">Airbnb Technical</h4>
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0;">10:00 AM &bull; Zoom Call</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                            <button class="btn btn-outline" style="flex: 1; padding: 6px 0; font-size: 0.8rem;" onclick="showToast('Rescheduled Request simulated!', 'success')">Reschedule</button>
+                            <button class="btn btn-primary" style="flex: 1; padding: 6px 0; font-size: 0.8rem;" onclick="location.href='interview-prep.html'">Prep Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        /* ============================================================
+           DASHBOARD — PERSONALIZED GREETING
+           ============================================================ */
+        (function applyGreeting() {
+            const session = StorageManager.get(STORAGE_KEYS.USER_SESSION);
+            const name    = session?.name || session?.email?.split('@')[0] || 'there';
+
+            // Time of day logic
+            const hour = new Date().getHours();
+            let greeting, emoji;
+            if      (hour >= 5  && hour < 12) { greeting = 'Good Morning';   emoji = '☀️'; }
+            else if (hour >= 12 && hour < 17) { greeting = 'Good Afternoon'; emoji = '🌤️'; }
+            else if (hour >= 17 && hour < 21) { greeting = 'Good Evening';   emoji = '🌆'; }
+            else                              { greeting = 'Good Night';     emoji = '🌙'; }
+
+            // First name only
+            const firstName = name.trim().split(' ')[0];
+
+            // Inject into the heading
+            const el = document.getElementById('dashboard-greeting-text');
+            if (el) el.textContent = `${greeting}, ${firstName}! ${emoji}`;
+
+            // Personalised sub-message
+            const sub = document.getElementById('dashboard-welcome-sub');
+            if (sub) {
+                const hour2 = new Date().getHours();
+                if (hour2 >= 5 && hour2 < 12) {
+                    sub.textContent = `Great start to the day, ${firstName}! You have new job matches waiting for you.`;
+                } else if (hour2 >= 12 && hour2 < 17) {
+                    sub.textContent = `You're in the top 5% of candidates this week, ${firstName}. Keep up the momentum!`;
+                } else if (hour2 >= 17 && hour2 < 21) {
+                    sub.textContent = `You've had a productive day, ${firstName}! Check your latest application updates.`;
+                } else {
+                    sub.textContent = `Working late, ${firstName}? Your applications are all caught up. Rest up!`;
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

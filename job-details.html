@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - Job Details</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in">
+            <div style="margin-bottom: 24px;">
+                <a href="jobs.html" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--primary); margin-bottom: 16px;">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    <span>Back to Jobs Board</span>
+                </a>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Left Details Info -->
+                <div class="card" style="padding: 32px; display: flex; flex-direction: column; gap: 24px;">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <img src="" id="job-details-logo" alt="Company Logo" style="width: 72px; height: 72px; border-radius: var(--border-radius-lg); object-fit: contain; background: var(--surface-low); padding: 8px;">
+                        <div>
+                            <h1 id="job-details-title" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Role Title</h1>
+                            <p id="job-details-company" style="font-size: 1rem; color: var(--text-muted); margin-bottom: 0;">Company Name</p>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 20px 0;">
+                        <div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Location</span>
+                            <h4 id="job-details-location" style="margin-top: 4px; font-size: 0.95rem;">Remote</h4>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Job Type</span>
+                            <h4 id="job-details-type" style="margin-top: 4px; font-size: 0.95rem;">Full-time</h4>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Salary Range</span>
+                            <h4 id="job-details-salary" style="margin-top: 4px; font-size: 0.95rem;">$180k - $240k</h4>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="font-size: 1.15rem; margin-bottom: 12px;">Job Description</h3>
+                        <p id="job-details-description" style="color: var(--text-muted); line-height: 1.7; font-size: 0.95rem;">
+                            Job summary paragraph details...
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 style="font-size: 1.15rem; margin-bottom: 12px;">Required Skills</h3>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="job-details-skills">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Apply Side Panel -->
+                <div class="card" style="padding: 24px; align-self: start; display: flex; flex-direction: column; gap: 20px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 0;">Apply Now</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0;">Submit your profile immediately to the company recruitment system.</p>
+                    
+                    <div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Experience Required</span>
+                        <h4 id="job-details-experience" style="margin-top: 4px; font-size: 0.9rem;">Senior (5+ years)</h4>
+                    </div>
+
+                    <button class="btn btn-primary w-full" id="job-details-apply-btn">Quick Apply</button>
+                    <button class="btn btn-outline w-full" onclick="showToast('Job saved!', 'success')">Bookmark Role</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/jobs.js"></script>
+</body>
+</html>

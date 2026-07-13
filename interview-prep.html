@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - Interview Trainer</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in" style="display: flex; flex-direction: column; gap: 24px;">
+            <div style="margin-bottom: 8px;">
+                <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">AI Mock Interview Practice</h1>
+                <p style="color: var(--text-muted);">Simulate real-time interview scenarios and receive feedback scoring parameters</p>
+            </div>
+
+            <!-- Double Columns: Simulator + Feedback -->
+            <div class="interview-simulator">
+                <!-- Left Simulator column -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <!-- Video placeholder -->
+                    <div class="video-simulation-placeholder">
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiL7RjE3aj4KVZM8KmEQFgVag44EJYYPwdAb0NF3KZ45tQe7_2nbazc8mqaRLpMaJ9KWwoTRVFdOf57Uqy3BylONbwSJR5VtFDeCkjzrC2hb1_5Tq2IlAtL0EdggS-ncgRoYZ6DSSshvyOli1xZNyGcF-ixk8b0Bqwh8w7QKzGz3ocydumVbZ466JqNNXe2k8b8vvuZbdm3K69PCVAGK--dMqIyPkKrweQ3ZrGSwb5kPUqknVai7go" id="interviewer-video-feed" class="video-simulation-avatar" alt="AI Interviewer">
+                        <!-- User PiP -->
+                        <div class="video-simulation-user-pip flex-center" id="user-pip">
+                            <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 32px;">videocam_off</span>
+                        </div>
+                    </div>
+
+                    <!-- Question Control -->
+                    <div class="card" style="padding: 24px;">
+                        <div class="flex-between" style="margin-bottom: 12px;">
+                            <span class="badge badge-secondary" id="question-type">Behavioral Question</span>
+                            <span style="font-weight: 700; font-size: 0.95rem; color: var(--primary);" id="mock-timer">02:00</span>
+                        </div>
+                        <h3 id="current-mock-question" style="font-size: 1.25rem; line-height: 1.4; margin-bottom: 16px;">
+                            Tell me about a time you had to manage a major conflict with a team engineer.
+                        </h3>
+                        <textarea class="form-control" id="mock-response-input" rows="4" placeholder="Type your answer here or click record to dictate..."></textarea>
+                        
+                        <div class="flex-between" style="margin-top: 20px;">
+                            <button class="btn btn-outline" onclick="toggleUserCamera()">Toggle Camera</button>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-secondary" onclick="nextMockQuestion()">Next Question</button>
+                                <button class="btn btn-primary" onclick="submitMockResponse()">Submit Answer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Coach Feedback column -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="card" style="padding: 24px; min-height: 300px; display: flex; flex-direction: column; gap: 20px;">
+                        <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 0;">AI Instant Feedback</h3>
+                        
+                        <!-- Analysis scores list -->
+                        <div class="interview-feedback-box" id="feedback-result-box" style="display: none;">
+                            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 8px;">Evaluation Score: 88/100</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;" id="feedback-text">
+                                Great structural composition. You detailed the SITUATION, TASK, ACTION and RESULT excellently. Try avoiding filler words like "um" to increase confidence.
+                            </p>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <div style="font-size: 0.75rem; font-weight: 600;">Speech Clarity: 92%</div>
+                                <div class="progress-bar-container" style="background-color: var(--surface-container-highest); height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div class="progress-bar-fill" style="width: 92%; background-color: var(--success); height: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Initial state explanation -->
+                        <div id="feedback-placeholder-box" style="text-align: center; color: var(--text-muted); padding: 40px 0;">
+                            <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 12px; color: var(--border-color);">psychology</span>
+                            <p style="font-size: 0.9rem; margin-bottom: 0;">Submit your response to start real-time AI parameter feedback scoring.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Questions Database
+        const MOCK_QUESTIONS = [
+            { type: 'Behavioral', q: "Tell me about a time you had to manage a major conflict with a team engineer." },
+            { type: 'Technical', q: "Explain how you would optimize visual rendering performance on a dashboard containing 50 live SVG elements." },
+            { type: 'HR / Core', q: "Why do you want to join GigFlow and what defines your professional work ethic?" }
+        ];
+        let currentIdx = 0;
+        let timerVal = 120;
+        let timerInterval = null;
+
+        // Start mock interview countdown
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerVal = 120;
+            const timerEl = document.getElementById('mock-timer');
+
+            timerInterval = setInterval(() => {
+                timerVal--;
+                const min = Math.floor(timerVal / 60).toString().padStart(2, '0');
+                const sec = (timerVal % 60).toString().padStart(2, '0');
+                timerEl.textContent = `${min}:${sec}`;
+
+                if (timerVal <= 0) {
+                    clearInterval(timerInterval);
+                    showToast('Time expired! Submit your answer.', 'error');
+                }
+            }, 1000);
+        }
+
+        function nextMockQuestion() {
+            currentIdx = (currentIdx + 1) % MOCK_QUESTIONS.length;
+            const item = MOCK_QUESTIONS[currentIdx];
+            
+            document.getElementById('current-mock-question').textContent = item.q;
+            document.getElementById('question-type').textContent = `${item.type} Question`;
+            document.getElementById('mock-response-input').value = '';
+            
+            // Hide feedback
+            document.getElementById('feedback-result-box').style.display = 'none';
+            document.getElementById('feedback-placeholder-box').style.display = 'block';
+
+            // Pulse avatar
+            const img = document.getElementById('interviewer-video-feed');
+            img.classList.add('speaking');
+            setTimeout(() => img.classList.remove('speaking'), 2500);
+
+            startTimer();
+        }
+
+        function submitMockResponse() {
+            const val = document.getElementById('mock-response-input').value.trim();
+            if (!val) {
+                showToast('Please type your response first', 'error');
+                return;
+            }
+
+            clearInterval(timerInterval);
+            showToast('Response processing...', 'info');
+
+            setTimeout(() => {
+                document.getElementById('feedback-placeholder-box').style.display = 'none';
+                document.getElementById('feedback-result-box').style.display = 'block';
+                showToast('Evaluation report available!', 'success');
+            }, 1200);
+        }
+
+        function toggleUserCamera() {
+            const pip = document.getElementById('user-pip');
+            if (pip.querySelector('.material-symbols-outlined').textContent === 'videocam_off') {
+                pip.innerHTML = `<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-McpRx1yuPgxpS_tSkdJjKZMG-X5msmkvOtILPl13aDd2lNepRmLbNOobLhbi1AYCMWbc57IhcEmukqKRgiM8ijGIOGmkiLAsJv0oYKPWGC-gDfxLPOPVgnUAWhhsfVkCiKDWoGJ92c2CGgCq1ETxr0aF7nMWCt3ANb_Qzo_H7CXJ28MYKnYxNK3k4GiKCTraUl-nVfEde7XG8S7zlVay7NoOK0-UE-ztcWex86oqL4PWJs6POxKp" alt="User Video" style="width: 100%; height: 100%; object-fit: cover;">`;
+                showToast('Camera feed simulated!', 'success');
+            } else {
+                pip.innerHTML = `<span class="material-symbols-outlined" style="color: #94a3b8; font-size: 32px;">videocam_off</span>`;
+            }
+        }
+
+        window.addEventListener('load', startTimer);
+    </script>
+</body>
+</html>

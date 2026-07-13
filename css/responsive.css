@@ -1,0 +1,173 @@
+/* ==========================================================================
+   GIGFLOW - RESPONSIVE STYLING & MOBILE COMPATIBILITY (responsive.css)
+   ========================================================================== */
+
+/* 1. TABLET BREAKPOINT (max-width: 1024px) */
+@media (max-width: 1024px) {
+    :root {
+        --sidebar-width: 72px; /* Shrink sidebar to icon-only mode */
+    }
+
+    .sidebar {
+        padding: 24px 8px;
+        align-items: center;
+    }
+
+    .sidebar-brand-section, 
+    .sidebar-group-title, 
+    .sidebar-link span:not(.material-symbols-outlined), 
+    .upgrade-card, 
+    .sidebar-footer button span:not(.material-symbols-outlined) {
+        display: none !important;
+    }
+
+    .sidebar-link {
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        border-radius: var(--border-radius-full);
+    }
+    
+    .sidebar-footer {
+        padding-top: 8px;
+        border-top: none;
+    }
+
+    .resume-builder-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .resume-preview-pane {
+        position: relative;
+        top: 0;
+        height: auto;
+    }
+
+    .kanban-board {
+        grid-template-columns: repeat(3, 1fr); /* Reduce columns */
+    }
+
+    .coach-container {
+        grid-template-columns: 80px 1fr; /* Compact coach sidebar */
+    }
+
+    .coach-sidebar-header h3, 
+    .coach-item-info {
+        display: none !important;
+    }
+
+    .coach-item {
+        justify-content: center;
+        padding: 16px 8px;
+    }
+
+    .interview-simulator {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 2. MOBILE LANDSCAPE & SMALL TABLETS (max-width: 768px) */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar-menu {
+        display: none !important; /* Hide standard nav menus */
+    }
+
+    .grid-cols-3, .grid-cols-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .welcome-banner {
+        padding: 24px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .welcome-score-widget {
+        width: 100%;
+        min-width: unset;
+    }
+}
+
+/* 3. MOBILE PORTRAIT (max-width: 480px) */
+@media (max-width: 480px) {
+    :root {
+        --sidebar-width: 0px; /* Fully hide sidebar, rely on collapsible navigation */
+    }
+
+    body {
+        font-size: 14px;
+    }
+
+    .navbar-container {
+        padding: 0 16px;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .welcome-info h1 {
+        font-size: 1.6rem;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        width: 260px;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+        display: flex !important;
+    }
+
+    .sidebar-brand-section, 
+    .sidebar-group-title, 
+    .sidebar-link span:not(.material-symbols-outlined), 
+    .sidebar-footer button span:not(.material-symbols-outlined) {
+        display: flex !important;
+    }
+    
+    .sidebar-link {
+        justify-content: flex-start;
+        width: 100%;
+        height: auto;
+        padding: 10px 14px;
+        border-radius: var(--border-radius);
+    }
+
+    .kanban-board {
+        grid-template-columns: 1fr; /* Stack columns on mobile */
+    }
+
+    .chart-container {
+        gap: 8px;
+    }
+
+    .chart-bar-fill {
+        max-width: 25px;
+    }
+}

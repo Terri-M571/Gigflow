@@ -1,0 +1,136 @@
+/* ==========================================================================
+   GIGFLOW - CSS MICRO-ANIMATIONS & SHIMMERS (animations.css)
+   ========================================================================== */
+
+/* Shimmer Progress Loading Effect */
+.shimmer-progress {
+    background: linear-gradient(90deg, var(--primary) 0%, #3b82f6 50%, var(--primary) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite linear;
+}
+
+.shimmer-bg {
+    background: linear-gradient(90deg, var(--surface-low) 25%, var(--surface-container-high) 50%, var(--surface-low) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite ease-in-out;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Typing taglines after-cursor keyframes */
+.typing-effect::after {
+    content: '|';
+    animation: blink 0.75s infinite;
+    color: var(--secondary);
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Pulse Glows */
+.pulse-glow {
+    animation: glow-pulse 2s infinite ease-in-out;
+}
+
+@keyframes glow-pulse {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(0, 86, 210, 0.1), 0 0 10px rgba(0, 86, 210, 0.05);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(0, 86, 210, 0.3), 0 0 25px rgba(0, 86, 210, 0.1);
+    }
+}
+
+/* Page Entry Fade-in Transitions */
+.fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Slide Drawer Overlay */
+.slide-in-right {
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* Hover scales */
+.hover-scale {
+    transition: var(--transition);
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+.hover-lift {
+    transition: var(--transition);
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Toast Message animations */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: var(--surface);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--primary);
+    padding: 16px 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    transform: translateY(150%);
+    animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast.toast-success {
+    border-left-color: var(--success);
+}
+
+.toast.toast-error {
+    border-left-color: var(--error);
+}
+
+@keyframes toast-slide-in {
+    to { transform: translateY(0); }
+}
+
+.toast.dismiss {
+    animation: toast-slide-out 0.3s ease-in forwards;
+}
+
+@keyframes toast-slide-out {
+    to { transform: translateY(150%); opacity: 0; }
+}
+
+/* Skeleton Loading lines */
+.skeleton-line {
+    height: 12px;
+    margin-bottom: 8px;
+    border-radius: var(--border-radius-sm);
+    width: 100%;
+}
+.skeleton-line.short { width: 60%; }
+.skeleton-line.medium { width: 85%; }
+.skeleton-line.header { height: 24px; margin-bottom: 16px; }
