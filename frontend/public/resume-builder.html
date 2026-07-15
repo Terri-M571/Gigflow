@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - AI Resume Architect</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in" style="height: calc(100vh - 100px); padding-bottom: 0;">
+            <div class="resume-builder-grid">
+                <!-- Left Edit Pane -->
+                <div class="resume-editor">
+                    <div style="margin-bottom: 24px;">
+                        <h1 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">Resume Architect</h1>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Fill in your details to compile your paper preview live</p>
+                    </div>
+
+                    <!-- AI Optimization bar -->
+                    <div class="card" style="padding: 16px; background-color: var(--primary-container); border-color: var(--primary); display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="color: var(--primary); font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                            <span style="font-size: 0.9rem; font-weight: 700;">AI Optimization Matching: <b style="color: var(--primary);" id="resume-builder-score">84%</b></span>
+                        </div>
+                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem;" onclick="optimizeResumeAI()">Optimize</button>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <!-- Section 1 -->
+                        <div class="card" style="padding: 24px;">
+                            <h3 style="font-size: 1.05rem; margin-bottom: 16px;">Personal Information</h3>
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input class="form-control" type="text" id="builder-name" placeholder="Your Name" oninput="updateResumePaper()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Target Job Title</label>
+                                <input class="form-control" type="text" id="builder-title" placeholder="e.g. Software Engineer" oninput="updateResumePaper()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input class="form-control" type="email" id="builder-email" placeholder="you@example.com" oninput="updateResumePaper()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CV Format</label>
+                                <select class="form-control" id="builder-format" onchange="toggleCvFormat()">
+                                    <option value="modern">Modern CV (Visual)</option>
+                                    <option value="ats">ATS CV (Plain Parsable)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Section 2 -->
+                        <div class="card" style="padding: 24px;">
+                            <h3 style="font-size: 1.05rem; margin-bottom: 16px;">Work Experience</h3>
+                            <div class="form-group">
+                                <label class="form-label">Latest Employer</label>
+                                <input class="form-control" type="text" id="builder-employer" value="NeuroLogic AI" oninput="updateResumePaper()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Core Responsibilities</label>
+                                <textarea class="form-control" id="builder-responsibilities" rows="4" oninput="updateResumePaper()">Lead design strategy for Developer UI playgrounds, collaborate with ML researchers to design chat outputs, and implement design systems.</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Live Preview Pane -->
+                <div class="resume-preview-pane">
+                    <div style="width: 100%; display: flex; flex-direction: column; gap: 16px; align-items: center;">
+                        <div style="width: 100%; display: flex; justify-content: flex-end; gap: 12px;">
+                            <button class="btn btn-outline" style="padding: 6px 12px;" onclick="showToast('Draft Saved!', 'success')">Save Draft</button>
+                            <button class="btn btn-primary" style="padding: 6px 12px;" onclick="exportResumePDF()">Export PDF</button>
+                        </div>
+                        <!-- Paper Sheet Frame -->
+                        <div class="resume-paper" id="resume-paper-frame">
+                            <h2 id="paper-name" style="color: var(--text-color);">Your Name</h2>
+                            <p class="resume-paper-subtitle" id="paper-title">Job Title</p>
+                            <p id="paper-email" style="font-size: 0.8rem; color: #64748b; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">you@example.com</p>
+
+                            <div class="resume-paper-section">
+                                <h3 class="resume-paper-section-title">Employment History</h3>
+                                <div class="resume-paper-item">
+                                    <div class="resume-paper-item-header">
+                                        <span id="paper-job-title">Senior Product Designer</span>
+                                        <span id="paper-employer">NeuroLogic AI</span>
+                                    </div>
+                                    <p id="paper-desc" style="margin-top: 6px; font-size: 0.8rem; color: #475569;">
+                                        Lead design strategy for Developer UI playgrounds, collaborate with ML researchers to design chat outputs, and implement design systems.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userSession = JSON.parse(localStorage.getItem('gigflow_session'));
+            if (userSession) {
+                document.getElementById('builder-name').value = userSession.name || '';
+                document.getElementById('builder-email').value = userSession.email || '';
+                updateResumePaper();
+            }
+        });
+
+        function updateResumePaper() {
+            document.getElementById('paper-name').textContent = document.getElementById('builder-name').value || 'Your Name';
+            document.getElementById('paper-title').textContent = document.getElementById('builder-title').value || 'Job Title';
+            document.getElementById('paper-email').textContent = `${document.getElementById('builder-email').value || 'you@example.com'} | San Francisco | Portfolio`;
+            document.getElementById('paper-job-title').textContent = document.getElementById('builder-title').value || 'Job Title';
+            document.getElementById('paper-employer').textContent = document.getElementById('builder-employer').value || 'Employer Name';
+            document.getElementById('paper-desc').textContent = document.getElementById('builder-responsibilities').value;
+        }
+
+        function toggleCvFormat() {
+            const format = document.getElementById('builder-format').value;
+            const paper = document.getElementById('resume-paper-frame');
+            if (format === 'ats') {
+                paper.style.fontFamily = 'Arial, sans-serif';
+                paper.style.color = '#000000';
+                paper.style.boxShadow = 'none';
+                paper.style.border = '1px solid #000';
+                document.getElementById('paper-name').style.color = '#000';
+            } else {
+                paper.style.fontFamily = 'var(--font-heading)';
+                paper.style.color = 'var(--text-color)';
+                paper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.08)';
+                paper.style.border = '1px solid var(--border-color)';
+                document.getElementById('paper-name').style.color = 'var(--text-color)';
+            }
+            showToast(`Switched to ${format.toUpperCase()} format`, 'info');
+        }
+
+        function optimizeResumeAI() {
+            showToast('AI optimization in progress...', 'info');
+            setTimeout(() => {
+                document.getElementById('resume-builder-score').textContent = '96%';
+                document.getElementById('builder-responsibilities').value += ' Integrated user testing to boost conversions by 15%.';
+                updateResumePaper();
+                showToast('ATS Score optimized successfully!', 'success');
+            }, 1200);
+        }
+
+        function exportResumePDF() {
+            showToast('Compiling PDF structure...', 'info');
+            setTimeout(() => {
+                showToast('Download complete!', 'success');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - Profile Manager</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in">
+            <div style="margin-bottom: 24px;">
+                <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Profile Manager</h1>
+                <p style="color: var(--text-muted);">Manage your professional identity and resume configurations</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Left Details Form -->
+                <div class="card" style="padding: 32px;">
+                    <form id="profile-edit-form">
+                        <!-- Avatar Upload Section -->
+                        <div style="display: flex; align-items: center; gap: 28px; margin-bottom: 32px;">
+
+                            <!-- Circular avatar with hover overlay -->
+                            <div class="avatar-upload-zone" id="avatar-zone" onclick="document.getElementById('profile-avatar-input').click()" title="Click to upload photo">
+                                <img
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-McpRx1yuPgxpS_tSkdJjKZMG-X5msmkvOtILPl13aDd2lNepRmLbNOobLhbi1AYCMWbc57IhcEmukqKRgiM8ijGIOGmkiLAsJv0oYKPWGC-gDfxLPOPVgnUAWhhsfVkCiKDWoGJ92c2CGgCq1ETxr0aF7nMWCt3ANb_Qzo_H7CXJ28MYKnYxNK3k4GiKCTraUl-nVfEde7XG8S7zlVay7NoOK0-UE-ztcWex86oqL4PWJs6POxKp"
+                                    alt="Profile Photo"
+                                    id="profile-avatar-preview"
+                                    class="avatar-preview-img">
+                                <div class="avatar-overlay">
+                                    <span class="material-symbols-outlined" style="font-size:28px; color:#fff;">photo_camera</span>
+                                    <span style="font-size:0.72rem; color:rgba(255,255,255,0.9); font-weight:600; margin-top:2px;">Change</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p style="font-weight:700; color:var(--text-color); margin-bottom:6px; font-size:0.95rem;">Profile Photo</p>
+                                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px; line-height:1.5;">Click the photo to upload a new one.<br>JPG, PNG, WEBP or GIF • Max 5 MB.</p>
+                                <div style="display:flex; gap:8px;">
+                                    <label for="profile-avatar-input" class="btn btn-outline" style="cursor:pointer; padding:7px 14px; font-size:0.82rem;">
+                                        <span class="material-symbols-outlined" style="font-size:16px;">upload</span>
+                                        Upload Photo
+                                    </label>
+                                    <button type="button" class="btn btn-ghost" id="remove-avatar-btn" style="padding:7px 14px; font-size:0.82rem; color:var(--error);" onclick="removeAvatar()">
+                                        <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+                                        Remove
+                                    </button>
+                                </div>
+                                <input type="file" id="profile-avatar-input" accept="image/*" style="display:none;">
+                            </div>
+                        </div>
+
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="profile-name">Full Name</label>
+                                <input class="form-control" type="text" id="profile-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="profile-availability">Availability Status</label>
+                                <select class="form-control" id="profile-availability">
+                                    <option value="Available">Available Now</option>
+                                    <option value="Interviewing">Open for Interviews</option>
+                                    <option value="Unavailable">Not Looking</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="profile-bio">Professional Summary / Bio</label>
+                            <textarea class="form-control" id="profile-bio" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="profile-skills">Professional Skills (comma separated)</label>
+                            <input class="form-control" type="text" id="profile-skills" placeholder="e.g. Figma, HTML5, CSS3, JavaScript, Python">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="profile-experience">Latest Work Experience</label>
+                                <input class="form-control" type="text" id="profile-experience" placeholder="e.g. Senior Designer at Google">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="profile-education">Highest Education Degree</label>
+                                <input class="form-control" type="text" id="profile-education" placeholder="e.g. MS in Human-Computer Interaction">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="profile-languages">Languages</label>
+                                <input class="form-control" type="text" id="profile-languages" placeholder="e.g. English, Spanish (Fluent)">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="profile-links">Portfolio Link / Social Links</label>
+                                <input class="form-control" type="url" id="profile-links" placeholder="e.g. https://alexrivera.design">
+                            </div>
+                        </div>
+
+                        <div class="flex-between" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+                            <button type="button" class="btn btn-outline" onclick="location.href='dashboard.html'">Cancel</button>
+                            <button type="submit" class="btn btn-primary" style="padding: 10px 32px;">Save Profile</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right Quick Setup Checklist -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="card" style="padding: 24px;">
+                        <h3 style="font-size: 1rem; margin-bottom: 16px;">Documents</h3>
+                        <div class="form-group">
+                            <label class="form-label">Attached Resume File</label>
+                            <div style="border: 2px dashed var(--border-color); border-radius: var(--border-radius); padding: 20px; text-align: center;">
+                                <span class="material-symbols-outlined" style="font-size: 32px; color: var(--primary); margin-bottom: 8px;">description</span>
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">resume_alex_rivera.pdf</p>
+                                <button class="btn btn-outline" style="font-size: 0.75rem; padding: 6px 12px;" onclick="showToast('Mock resume uploaded successfully!', 'success')">Upload New</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

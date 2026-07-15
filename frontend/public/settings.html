@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - Settings</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in">
+            <div style="margin-bottom: 24px;">
+                <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Settings</h1>
+                <p style="color: var(--text-muted);">Configure your account preferences and security standards</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Left Settings Forms -->
+                <div class="card" style="padding: 32px;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Security & Password</h3>
+                    <form id="settings-pwd-form" onsubmit="event.preventDefault(); showToast('Password updated successfully!', 'success'); this.reset();">
+                        <div class="form-group">
+                            <label class="form-label" for="current-pwd">Current Password</label>
+                            <input class="form-control" type="password" id="current-pwd" placeholder="••••••••" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="new-pwd">New Password</label>
+                                <input class="form-control" type="password" id="new-pwd" placeholder="••••••••" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="confirm-pwd">Confirm New Password</label>
+                                <input class="form-control" type="password" id="confirm-pwd" placeholder="••••••••" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Update Password</button>
+                    </form>
+
+                    <h3 style="font-size: 1.2rem; margin-top: 40px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">System Preferences</h3>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="flex-between">
+                            <div>
+                                <h4 style="font-size: 0.95rem; margin-bottom: 2px;">Email Notifications</h4>
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0;">Receive emails when matching jobs are found</p>
+                            </div>
+                            <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+                        </div>
+                        <div class="flex-between">
+                            <div>
+                                <h4 style="font-size: 0.95rem; margin-bottom: 2px;">Coaching Alerts</h4>
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0;">Notify when coaches send messages</p>
+                            </div>
+                            <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Quick Storage Tools -->
+                <div class="card" style="padding: 24px; align-self: start;">
+                    <h3 style="font-size: 1rem; margin-bottom: 16px; color: var(--error);">Danger Zone</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">Wipe local browser session configurations or clear database registers.</p>
+                    <button class="btn btn-outline w-full" style="color: var(--error); border-color: var(--error);" onclick="clearLocalData()">Wipe Local Data</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        function clearLocalData() {
+            if (confirm("Are you sure you want to wipe all session data? This will reset GigFlow to initial mock settings.")) {
+                StorageManager.clear();
+                showToast('LocalStorage database wiped! Reloading...', 'success');
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+    </script>
+</body>
+</html>

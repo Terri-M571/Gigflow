@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - Career Analytics</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in" style="display: flex; flex-direction: column; gap: 24px;">
+            <div style="margin-bottom: 8px;">
+                <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Career Analytics</h1>
+                <p style="color: var(--text-muted);">Monitor your application success rate and freelance earnings progress</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <section class="stats-grid" style="margin-bottom: 0;">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">send</span>
+                    </div>
+                    <p>Applications Sent</p>
+                    <h3>28</h3>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">call</span>
+                    </div>
+                    <p>Interview Rate</p>
+                    <h3>22%</h3>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+                    <p>Freelance Earnings</p>
+                    <h3>$4,850</h3>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">hourglass_empty</span>
+                    </div>
+                    <p>Learning Hours</p>
+                    <h3>34 hrs</h3>
+                </div>
+            </section>
+
+            <!-- Charts grid: bar + line charts -->
+            <div class="dashboard-grid">
+                <!-- Bar Chart column -->
+                <div class="card" style="padding: 24px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 8px;">Applications Sent (Monthly)</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 24px;">Distribution of job submissions across the last 6 months</p>
+                    <div class="chart-container" id="analytics-bar-chart">
+                        <!-- Injected dynamically via analytics.js -->
+                    </div>
+                </div>
+
+                <!-- Line Chart column -->
+                <div class="card" style="padding: 24px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 8px;">Freelance Earnings ($)</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 24px;">Weekly payment tracking milestones</p>
+                    <div id="analytics-line-chart" style="width: 100%; height: 220px;">
+                        <!-- Injected dynamically via analytics.js -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/analytics.js"></script>
+</body>
+</html>
