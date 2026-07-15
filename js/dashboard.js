@@ -13,55 +13,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function loadDashboardStats() {
     const apps = StorageManager.get(STORAGE_KEYS.APPLICATIONS) || [];
-    const jobs = StorageManager.get(STORAGE_KEYS.JOBS) || [];
+    const savedJobs = StorageManager.get(STORAGE_KEYS.SAVED_JOBS) || [];
 
     // Applications Count
     const activeApps = apps.filter(a => a.status === 'applied' || a.status === 'interview').length;
-    const appsCountEl = document.getElementById('stat-active-applications');
+    const appsCountEl = document.getElementById('stat-active');
     if (appsCountEl) appsCountEl.textContent = activeApps;
 
     // Upcoming Interviews Count
     const interviewsCount = apps.filter(a => a.status === 'interview').length;
-    const interviewsCountEl = document.getElementById('stat-upcoming-interviews');
+    const interviewsCountEl = document.getElementById('stat-interviews');
     if (interviewsCountEl) interviewsCountEl.textContent = interviewsCount;
 
-    // Profile Views Mock
-    const viewsEl = document.getElementById('stat-profile-views');
-    if (viewsEl) viewsEl.textContent = '1.4k';
+    // Saved Jobs Count
+    const savedJobsEl = document.getElementById('stat-saved');
+    if (savedJobsEl) savedJobsEl.textContent = savedJobs.length;
 
-    // Career Score Mock
-    const scoreEl = document.getElementById('stat-career-score');
-    if (scoreEl) scoreEl.textContent = '945';
+    // ATS Mock Score
+    const atsScoreEl = document.getElementById('stat-ats');
+    if (atsScoreEl) atsScoreEl.textContent = activeApps > 0 ? '82%' : '--';
 }
 
 function calculateProfileCompletion() {
-    const savedProfile = localStorage.getItem('gigflow_profile');
-    let completion = 40; // Default baseline
+    const profileData = StorageManager.get('gigflow_profile');
+    let completion = 20; // Default baseline for having an account
 
-    if (savedProfile) {
-        try {
-            const profile = JSON.parse(savedProfile);
-            if (profile.name) completion += 10;
-            if (profile.bio && profile.bio !== 'AI career builder profile') completion += 10;
-            if (profile.skills && profile.skills.length > 0) completion += 10;
-            if (profile.experience && profile.experience !== 'Not set yet') completion += 10;
-            if (profile.education && profile.education !== 'Not set yet') completion += 10;
-            if (profile.avatar && !profile.avatar.includes('AB6AXuD-Mcp')) completion += 10; // customized photo
-        } catch (e) {
-            console.error("Error evaluating profile score:", e);
-        }
+    if (profileData) {
+        if (profileData.role) completion += 20;
+        if (profileData.experience) completion += 15;
+        if (profileData.industry) completion += 15;
+        if (profileData.skills && profileData.skills.length > 0) completion += 15;
+        // The last 15% is for portfolio link
+        if (profileData.portfolio && profileData.portfolio.trim() !== '') completion += 15;
     }
 
-    const progressFill = document.getElementById('dashboard-profile-progress-fill');
-    const progressText = document.getElementById('dashboard-profile-progress-text');
-    const welcomeUserText = document.getElementById('dashboard-welcome-username');
+    // Target the SVG ring and the text inside it
+    const ring = document.querySelector('.progress-ring-circle');
+    const textDiv = document.querySelector('svg + div');
 
-    if (progressFill) progressFill.style.width = `${completion}%`;
-    if (progressText) progressText.textContent = `${completion}%`;
-
-    const userSession = StorageManager.get(STORAGE_KEYS.USER_SESSION);
-    if (welcomeUserText && userSession) {
-        welcomeUserText.textContent = `Good Morning, ${userSession.name || 'Alex'}!`;
+    if (ring && textDiv) {
+        // Circumference calculation for r=54: 2 * pi * 54 = 339.292
+        const circumference = 339.292;
+        const offset = circumference - (completion / 100) * circumference;
+        ring.style.strokeDashoffset = offset;
+        textDiv.textContent = `${completion}%`;
     }
 }
 
@@ -76,7 +71,13 @@ function loadDashboardLists() {
     if (recentAppsContainer) {
         recentAppsContainer.innerHTML = '';
         if (apps.length === 0) {
-            recentAppsContainer.innerHTML = `<div class="text-center p-4 text-muted">No applications sent recently. Explore the Job Board!</div>`;
+            recentAppsContainer.innerHTML = `
+                <div style="padding: 24px; text-align: center; color: var(--text-muted); background: var(--surface-low); border-radius: 12px; border: 1px dashed var(--border-color);">
+                    <span class="material-symbols-outlined" style="font-size: 32px; margin-bottom: 8px; opacity: 0.5;">assignment</span><br>
+                    No applications yet.<br>
+                    <button class="btn btn-primary btn-sm mt-3" onclick="location.href='jobs.html'">Find Jobs</button>
+                </div>
+            `;
         } else {
             apps.slice(0, 3).forEach(app => {
                 let badgeClass = 'badge-primary';
@@ -85,9 +86,9 @@ function loadDashboardLists() {
                 if (app.status === 'offer') badgeClass = 'badge-success';
 
                 recentAppsContainer.innerHTML += `
-                    <div class="flex-between p-3 bg-light rounded mb-2 border border-transparent hover-border hover-lift" style="background-color: var(--surface-low); border-radius: var(--border-radius); transition: var(--transition-fast);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--surface-low); border-radius: 12px; transition: var(--transition);">
                         <div style="display: flex; align-items: center; gap: 16px;">
-                            <div class="flex-center" style="width: 48px; height: 48px; background-color: var(--surface-container-high); border-radius: var(--border-radius); font-weight: 800; color: var(--primary);">
+                            <div style="width: 42px; height: 42px; background-color: var(--surface-container-high); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--primary);">
                                 ${app.logo || app.company.substring(0,2).toUpperCase()}
                             </div>
                             <div>
@@ -102,43 +103,29 @@ function loadDashboardLists() {
         }
     }
 
-    // Render Recommended Jobs Carousel/Grid
+    // Render Recommended Jobs (Mock)
     if (recommendedJobsContainer) {
         recommendedJobsContainer.innerHTML = '';
-        jobs.slice(0, 2).forEach(job => {
+        
+        const mockJobs = [
+            { title: 'Senior UX Designer', company: 'Stripe', salary: '$140k - $180k', match: '96%' },
+            { title: 'Product Manager', company: 'Notion', salary: '$130k - $160k', match: '92%' }
+        ];
+
+        mockJobs.forEach(job => {
             recommendedJobsContainer.innerHTML += `
-                <div class="card hover-lift" style="min-width: 290px; flex-grow: 1; position: relative;">
-                    <button class="btn btn-ghost btn-icon" style="position: absolute; top: 12px; right: 12px; color: var(--text-muted);" onclick="bookmarkJob('${job.id}')">
-                        <span class="material-symbols-outlined">bookmark</span>
-                    </button>
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                        <img src="${job.logo}" alt="${job.company}" style="width: 44px; height: 44px; border-radius: var(--border-radius); object-fit: contain; background: var(--surface-low); padding: 4px;">
-                        <div>
-                            <h4 style="font-size: 0.95rem; margin-bottom: 2px;">${job.title}</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0;">${job.company} &bull; ${job.location}</p>
-                        </div>
+                <div style="padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--surface);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <h4 style="font-size: 1rem; margin-bottom: 4px;">${job.title}</h4>
+                        <span style="color: #10b981; font-weight: 800; font-size: 0.85rem;">${job.match} Match</span>
                     </div>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;">
-                        ${job.skills.slice(0,3).map(skill => `<span class="badge badge-primary">${skill}</span>`).join('')}
-                    </div>
-                    <div class="flex-between" style="border-top: 1px solid var(--border-color); padding-top: 12px; font-weight: 700; font-size: 0.9rem;">
-                        <span>${job.salary}</span>
-                        <a href="job-details.html?id=${job.id}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Apply</a>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">${job.company} &bull; ${job.salary}</p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline w-full" style="padding: 6px; font-size: 0.8rem;">View</button>
+                        <button class="btn btn-primary w-full" style="padding: 6px; font-size: 0.8rem;">Quick Apply</button>
                     </div>
                 </div>
             `;
         });
     }
 }
-
-function bookmarkJob(jobId) {
-    let bookmarks = StorageManager.get(STORAGE_KEYS.BOOKMARKS) || [];
-    if (!bookmarks.includes(jobId)) {
-        bookmarks.push(jobId);
-        StorageManager.set(STORAGE_KEYS.BOOKMARKS, bookmarks);
-        showToast('Job added to saved bookmarks!', 'success');
-    } else {
-        showToast('Job already bookmarked', 'info');
-    }
-}
-window.bookmarkJob = bookmarkJob;

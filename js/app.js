@@ -3,6 +3,9 @@
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 0. Enforce Auth
+    enforceAuthGuard();
+
     // 1. Initialize Theme (Light / Dark Mode)
     initTheme();
 
@@ -54,6 +57,34 @@ function isLoggedIn() {
         return false;
     }
 }
+
+/**
+ * Page Load Auth Guard:
+ * Redirects immediately if a user tries to access a protected page without logging in.
+ */
+function enforceAuthGuard() {
+    const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+    const publicPages = ['index.html', 'login.html', 'signup.html', 'pricing.html', ''];
+    
+    if (!publicPages.includes(currentFile) && !isLoggedIn()) {
+        sessionStorage.setItem('gigflow_redirect_after_login', currentFile);
+        window.location.href = 'login.html';
+    }
+}
+
+/**
+ * Handle user logout globally.
+ */
+function handleLogout(e) {
+    if (e) e.preventDefault();
+    localStorage.removeItem('gigflow_user_session');
+    // We don't remove gigflow_users array, just the active session
+    showToast('Logging out...', 'info');
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 500);
+}
+window.handleLogout = handleLogout;
 
 /**
  * Intercepts a click on a protected nav link.
@@ -112,7 +143,7 @@ function injectLayouts() {
                         <button class="btn btn-ghost btn-icon theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
                             <span class="material-symbols-outlined">dark_mode</span>
                         </button>
-                        <button class="btn btn-ghost btn-icon" id="mobile-sidebar-toggle" style="display: none;" aria-label="Open Sidebar Menu">
+                        <button class="btn btn-ghost btn-icon" id="mobile-sidebar-toggle" aria-label="Open Sidebar Menu">
                             <span class="material-symbols-outlined">menu</span>
                         </button>
                         <button class="btn btn-ghost btn-icon" onclick="showToast('No new notifications', 'info')">
@@ -152,77 +183,64 @@ function injectLayouts() {
                     <p class="sidebar-subtitle">Navigation Hub</p>
                 </div>
                 <nav class="sidebar-menu">
-                    <span class="sidebar-group-title">Core Dashboard</span>
+                    <span class="sidebar-group-title">Main</span>
                     <a href="dashboard.html" class="sidebar-link ${currentFile === 'dashboard.html' ? 'active' : ''}">
                         <span class="material-symbols-outlined">dashboard</span>
                         <span>Dashboard</span>
                     </a>
+                    <a href="jobs.html" class="sidebar-link ${currentFile === 'jobs.html' || currentFile === 'job-details.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">search</span>
+                        <span>Job Search</span>
+                    </a>
+                    <a href="#" class="sidebar-link">
+                        <span class="material-symbols-outlined">bookmark</span>
+                        <span>Saved Jobs</span>
+                    </a>
+                    <a href="application-tracker.html" class="sidebar-link ${currentFile === 'application-tracker.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">assignment_turned_in</span>
+                        <span>Applications</span>
+                    </a>
+
+                    <span class="sidebar-group-title">AI Tools</span>
+                    <a href="resume-builder.html" class="sidebar-link ${currentFile === 'resume-builder.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">edit_note</span>
+                        <span>Resume Builder</span>
+                    </a>
+                    <a href="cover-letter.html" class="sidebar-link ${currentFile === 'cover-letter.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">description</span>
+                        <span>Cover Letter Generator</span>
+                    </a>
+                    <a href="interview-prep.html" class="sidebar-link ${currentFile === 'interview-prep.html' || currentFile === 'ai-interview.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">psychology</span>
+                        <span>Interview Coach</span>
+                    </a>
+                    <a href="learning.html" class="sidebar-link ${currentFile === 'learning.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">school</span>
+                        <span>Career Roadmap</span>
+                    </a>
+                    <a href="portfolio.html" class="sidebar-link ${currentFile === 'portfolio.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">folder_shared</span>
+                        <span>Portfolio Review</span>
+                    </a>
+
+                    <span class="sidebar-group-title">Account</span>
                     <a href="profile.html" class="sidebar-link ${currentFile === 'profile.html' ? 'active' : ''}">
                         <span class="material-symbols-outlined">person</span>
-                        <span>Profile Manager</span>
+                        <span>Profile</span>
                     </a>
-                    <a href="analytics.html" class="sidebar-link ${currentFile === 'analytics.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">analytics</span>
-                        <span>Analytics</span>
+                    <a href="pricing.html" class="sidebar-link ${currentFile === 'pricing.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">workspace_premium</span>
+                        <span>Subscription</span>
                     </a>
                     <a href="settings.html" class="sidebar-link ${currentFile === 'settings.html' ? 'active' : ''}">
                         <span class="material-symbols-outlined">settings</span>
                         <span>Settings</span>
                     </a>
-
-                    <span class="sidebar-group-title">Career Search</span>
-                    <a href="jobs.html" class="sidebar-link ${currentFile === 'jobs.html' || currentFile === 'job-details.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">work</span>
-                        <span>Jobs Board</span>
-                    </a>
-                    <a href="freelance.html" class="sidebar-link ${currentFile === 'freelance.html' || currentFile === 'project-details.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">payments</span>
-                        <span>Freelance Market</span>
-                    </a>
-                    <a href="application-tracker.html" class="sidebar-link ${currentFile === 'application-tracker.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">assignment_turned_in</span>
-                        <span>Job Tracker</span>
-                    </a>
-
-                    <span class="sidebar-group-title">AI Career Tools</span>
-                    <a href="ats-checker.html" class="sidebar-link ${currentFile === 'ats-checker.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">troubleshoot</span>
-                        <span>ATS Scorecard</span>
-                    </a>
-                    <a href="resume-builder.html" class="sidebar-link ${currentFile === 'resume-builder.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">edit_note</span>
-                        <span>Resume Architect</span>
-                    </a>
-                    <a href="cover-letter.html" class="sidebar-link ${currentFile === 'cover-letter.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">description</span>
-                        <span>Cover Letter AI</span>
-                    </a>
-                    <a href="interview-prep.html" class="sidebar-link ${currentFile === 'interview-prep.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">psychology</span>
-                        <span>Interview Trainer</span>
-                    </a>
-
-                    <span class="sidebar-group-title">Professional Hub</span>
-                    <a href="learning.html" class="sidebar-link ${currentFile === 'learning.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">school</span>
-                        <span>Learning Pathways</span>
-                    </a>
-                    <a href="portfolio.html" class="sidebar-link ${currentFile === 'portfolio.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">folder_shared</span>
-                        <span>Portfolio Builder</span>
-                    </a>
-                    <a href="live-coach.html" class="sidebar-link ${currentFile === 'live-coach.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">forum</span>
-                        <span>Live Career Coach</span>
+                    <a href="#" onclick="handleLogout(event)" class="sidebar-link" style="color: var(--error);">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span>Logout</span>
                     </a>
                 </nav>
-                <div class="sidebar-footer">
-                    <div class="upgrade-card">
-                        <h4>Go Premium</h4>
-                        <p>Unlock detailed ATS feedback and 1-on-1 coaching.</p>
-                        <button class="btn btn-secondary w-full" onclick="showToast('Upgrade process simulated!', 'success')">Upgrade</button>
-                    </div>
-                </div>
             </aside>
         `;
     }
@@ -280,7 +298,6 @@ function setupLayoutInteractions() {
     if (sidebar) {
         // Show menu button on small screens
         if (toggleBtn) {
-            toggleBtn.style.display = 'inline-flex';
             toggleBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 sidebar.classList.toggle('mobile-open');

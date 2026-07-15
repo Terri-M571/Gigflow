@@ -362,3 +362,6 @@ p {
 #sidebar-placeholder {
     height: 100%;
 }
+
+/* Mobile Menu Toggle */
+#mobile-sidebar-toggle { display: none; }

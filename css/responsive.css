@@ -13,6 +13,10 @@
         align-items: center;
     }
 
+    #mobile-sidebar-toggle {
+        display: inline-flex !important;
+    }
+
     .sidebar-brand-section, 
     .sidebar-group-title, 
     .sidebar-link span:not(.material-symbols-outlined), 

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - Subscription Pricing</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+    <style>
+        :root {
+            --gigflow-blue: #004AC6;
+            --gigflow-amber: #ff8c00;
+        }
+
+        /* Pricing Header */
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 48px;
+            padding-top: 24px;
+        }
+        .pricing-header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 16px;
+            color: var(--text-color);
+        }
+        .pricing-header p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+
+        /* Currency Toggle */
+        .currency-toggle-wrapper {
+            display: inline-flex;
+            align-items: center;
+            background: var(--surface-low);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 30px;
+            gap: 12px;
+        }
+        .toggle-label {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+        .toggle-label.active {
+            color: var(--text-color);
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--surface-container-high);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider {
+            background-color: var(--gigflow-amber);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Pricing Grid */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            max-width: 1100px;
+            margin: 0 auto 64px;
+        }
+
+        /* Pricing Card Base */
+        .pricing-card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px 32px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+            backdrop-filter: blur(10px);
+        }
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+        }
+        .pricing-card.popular {
+            border: 2px solid var(--gigflow-blue);
+            transform: scale(1.03);
+            box-shadow: 0 12px 32px rgba(0, 74, 198, 0.12);
+        }
+        .pricing-card.popular:hover {
+            transform: scale(1.03) translateY(-8px);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gigflow-blue);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card-header {
+            margin-bottom: 32px;
+        }
+        .card-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .card-price {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--text-color);
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .card-price .period {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .card-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            min-height: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 40px;
+            flex-grow: 1;
+        }
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+        .feature-icon {
+            color: var(--gigflow-blue);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        /* Buttons */
+        .btn-pricing {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-pricing-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+        }
+        .btn-pricing-outline:hover {
+            border-color: var(--gigflow-blue);
+            color: var(--gigflow-blue);
+        }
+        .btn-pricing-primary {
+            background: var(--gigflow-blue);
+            border: none;
+            color: white;
+        }
+        .btn-pricing-primary:hover {
+            background: #003da6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 74, 198, 0.3);
+        }
+
+        /* Custom Modal Layout */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-container {
+            background: var(--surface);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+        .modal-header {
+            padding: 24px 32px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title { font-size: 1.25rem; font-weight: 800; }
+        .modal-close {
+            background: none; border: none; cursor: pointer; color: var(--text-muted);
+            font-size: 24px; padding: 4px; display: flex; align-items: center;
+            transition: color 0.2s;
+        }
+        .modal-close:hover { color: var(--error); }
+        .modal-body { padding: 32px; }
+        
+        .modal-step { display: none; }
+        .modal-step.active { display: block; animation: fadeSlideUp 0.3s ease forwards; }
+
+        /* Currency / Payment Radio Buttons */
+        .payment-method-card {
+            display: block;
+            margin-bottom: 12px;
+            position: relative;
+            cursor: pointer;
+        }
+        .payment-method-card input[type="radio"] {
+            position: absolute; opacity: 0; width: 0; height: 0;
+        }
+        .pm-content {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--surface);
+            transition: 0.2s;
+        }
+        .payment-method-card input[type="radio"]:checked + .pm-content {
+            border-color: var(--gigflow-blue);
+            background: rgba(0, 74, 198, 0.05);
+        }
+        .pm-icon { margin-right: 16px; font-size: 28px; }
+        .pm-name { font-size: 1.05rem; font-weight: 600; }
+        .payment-method-card.disabled { opacity: 0.5; cursor: not-allowed; }
+        .payment-method-card.disabled input[type="radio"] { pointer-events: none; }
+
+        @media (max-width: 1024px) {
+            .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+            .pricing-card.popular { transform: none; }
+            .pricing-card.popular:hover { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in" style="padding-bottom: 80px;">
+            
+            <div class="pricing-header">
+                <h1>Simple, Transparent Pricing</h1>
+                <p>Start for free, then upgrade to unleash the full power of GigFlow AI on your career.</p>
+                
+                <div class="currency-toggle-wrapper">
+                    <span class="toggle-label" id="label-usd">USD ($)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="currency-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="toggle-label" id="label-kes">KES (KSh)</span>
+                </div>
+            </div>
+
+            <div class="pricing-grid">
+                
+                <!-- Free Plan -->
+                <div class="pricing-card">
+                    <div class="card-header">
+                        <div class="card-name">Free Plan</div>
+                        <div class="card-price" id="price-free"><span>$0</span></div>
+                        <div class="card-subtext">Always free for basic use</div>
+                    </div>
+                    <ul class="feature-list" id="features-free">
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> 5 Resume Scans per month</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> ATS Score</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> Resume Builder</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> Resume Manager</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> Job Tracker</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> Thank You Notes</li>
+                    </ul>
+                    <button class="btn-pricing btn-pricing-outline" onclick="location.href='dashboard.html'">Get Started Free</button>
+                </div>
+
+                <!-- Quarterly Plan -->
+                <div class="pricing-card popular">
+                    <div class="popular-badge">Most Popular</div>
+                    <div class="card-header">
+                        <div class="card-name">Quarterly Plan</div>
+                        <div class="card-price" id="price-quarterly"><span>$29.99</span><span class="period">/month</span></div>
+                        <div class="card-subtext" id="subtext-quarterly">Billed every 3 months</div>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon" style="color:var(--gigflow-amber)">star</span> <strong>All Free features, plus:</strong></li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> Unlimited Resume Scans</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> AI Resume Optimization</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> AI Cover Letter Generator</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> ATS-Friendly Templates</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> AI Job Match & LinkedIn Optimizer</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> Learning Center Access</li>
+                    </ul>
+                    <button class="btn-pricing btn-pricing-primary" onclick="openSubscriptionModal('plan_quarterly')">Start 7-Day Free Trial</button>
+                </div>
+
+                <!-- Monthly Plan -->
+                <div class="pricing-card">
+                    <div class="card-header">
+                        <div class="card-name">Monthly Plan</div>
+                        <div class="card-price" id="price-monthly"><span>$49.99</span><span class="period">/month</span></div>
+                        <div class="card-subtext" id="subtext-monthly">&nbsp;</div>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">star</span> <strong>All Premium Features included</strong></li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> Unlimited Resume Scans</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> AI Resume Optimization</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> AI Cover Letter Generator</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> ATS-Friendly Templates</li>
+                        <li class="feature-item"><span class="material-symbols-outlined feature-icon">check_circle</span> AI Job Match</li>
+                    </ul>
+                    <button class="btn-pricing btn-pricing-outline" onclick="openSubscriptionModal('plan_monthly')">Subscribe Now</button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Subscription Modal -->
+    <div class="modal-overlay" id="subscription-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Complete Subscription</h3>
+                <button class="modal-close" onclick="closeSubscriptionModal()"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            
+            <div class="modal-body">
+                
+                <!-- Step 1: Currency Selection -->
+                <div class="modal-step" id="modal-step-1">
+                    <h4 style="margin-bottom: 24px;">Choose Your Payment Currency</h4>
+                    
+                    <label class="payment-method-card">
+                        <input type="radio" name="modal_currency" id="modal-curr-kes" value="KES">
+                        <div class="pm-content">
+                            <span class="pm-name">🇰🇪 Kenyan Shilling (KES)</span>
+                        </div>
+                    </label>
+                    <label class="payment-method-card">
+                        <input type="radio" name="modal_currency" id="modal-curr-usd" value="USD">
+                        <div class="pm-content">
+                            <span class="pm-name">🇺🇸 US Dollar (USD)</span>
+                        </div>
+                    </label>
+
+                    <button class="btn btn-primary w-full" style="margin-top: 24px; padding: 14px; font-size: 1.05rem;" onclick="handleStep1Submit()">Continue</button>
+                </div>
+
+                <!-- Step 2: Payment Method Selection -->
+                <div class="modal-step" id="modal-step-2">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+                        <button class="btn btn-ghost btn-icon" onclick="showModalStep(1)" style="margin-left: -12px;"><span class="material-symbols-outlined">arrow_back</span></button>
+                        <h4 style="margin: 0;">Select Payment Method</h4>
+                    </div>
+                    
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Paying in: <strong id="modal-currency-display">USD</strong></p>
+
+                    <div id="payment-methods-container">
+                        <!-- Injected via JS -->
+                    </div>
+
+                    <button class="btn btn-primary w-full" id="btn-step-2" style="margin-top: 24px; padding: 14px; font-size: 1.05rem;" onclick="handleStep2Submit()">Confirm Payment</button>
+                </div>
+
+                <!-- Step 3: Success / Prototype Message -->
+                <div class="modal-step" id="modal-step-3">
+                    <div style="text-align: center; padding: 24px 0;">
+                        <div style="width: 80px; height: 80px; background: rgba(0, 74, 198, 0.1); color: var(--gigflow-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                            <span class="material-symbols-outlined" style="font-size: 40px;">construction</span>
+                        </div>
+                        <h4 style="font-size: 1.25rem; margin-bottom: 16px;">Integration Coming Soon</h4>
+                        <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 32px;">Payment integration is currently under development. This prototype demonstrates the user experience and UI flow only. No real payment request was made.</p>
+                        <button class="btn btn-outline w-full" style="padding: 14px;" onclick="closeSubscriptionModal()">Return to Pricing</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/pricing.js"></script>
+</body>
+</html>

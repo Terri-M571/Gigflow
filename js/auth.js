@@ -167,11 +167,8 @@ function handleLogin(e) {
     const users = StorageManager.get(STORAGE_KEYS.USERS) || [];
     const matchedUser = users.find(u => u.email === email && u.password === password);
 
-    // Demo account fallback
-    const isDemoLogin = (email === 'alex@gigflow.ai' && password === 'Password123!');
-
-    if (matchedUser || isDemoLogin) {
-        const sessionUser = matchedUser || { name: 'Alex Rivera', email: 'alex@gigflow.ai' };
+    if (matchedUser) {
+        const sessionUser = matchedUser;
 
         // Store session with name so greeting can use it everywhere
         StorageManager.set(STORAGE_KEYS.USER_SESSION, {
@@ -199,11 +196,12 @@ function handleLogin(e) {
 function handleSignup(e) {
     e.preventDefault();
     const name     = document.getElementById('signup-name').value.trim();
+    const industry = document.getElementById('signup-industry').value;
     const email    = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value;
     const agree    = document.getElementById('signup-agree')?.checked;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !industry) {
         showToast('Please fill in all fields', 'error');
         return;
     }
@@ -225,13 +223,14 @@ function handleSignup(e) {
     }
 
     // Save user
-    const newUser = { name, email, password };
+    const newUser = { name, email, password, industry };
     users.push(newUser);
     StorageManager.set(STORAGE_KEYS.USERS, users);
 
     // Write initial profile
     const initialProfile = {
         name:         name,
+        industry:     industry,
         bio:          'AI career builder profile',
         avatar:       'https://lh3.googleusercontent.com/aida-public/AB6AXuD-McpRx1yuPgxpS_tSkdJjKZMG-X5msmkvOtILPl13aDd2lNepRmLbNOobLhbi1AYCMWbc57IhcEmukqKRgiM8ijGIOGmkiLAsJv0oYKPWGC-gDfxLPOPVgnUAWhhsfVkCiKDWoGJ92c2CGgCq1ETxr0aF7nMWCt3ANb_Qzo_H7CXJ28MYKnYxNK3k4GiKCTraUl-nVfEde7XG8S7zlVay7NoOK0-UE-ztcWex86oqL4PWJs6POxKp',
         skills:       ['Figma', 'HTML5', 'CSS3', 'JavaScript'],
@@ -247,6 +246,7 @@ function handleSignup(e) {
     StorageManager.set(STORAGE_KEYS.USER_SESSION, {
         name:      name,
         email:     email,
+        industry:  industry,
         loggedIn:  true,
         loginTime: new Date().toISOString()
     });
@@ -255,7 +255,7 @@ function handleSignup(e) {
     showToast(`${greeting} Your account is ready! 🚀`, 'success');
 
     setTimeout(() => {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'onboarding.html';
     }, 1300);
 }
 

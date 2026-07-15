@@ -47,15 +47,22 @@
                             <h3 style="font-size: 1.05rem; margin-bottom: 16px;">Personal Information</h3>
                             <div class="form-group">
                                 <label class="form-label">Full Name</label>
-                                <input class="form-control" type="text" id="builder-name" value="Alex Rivera" oninput="updateResumePaper()">
+                                <input class="form-control" type="text" id="builder-name" placeholder="Your Name" oninput="updateResumePaper()">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Target Job Title</label>
-                                <input class="form-control" type="text" id="builder-title" value="Senior Product Designer" oninput="updateResumePaper()">
+                                <input class="form-control" type="text" id="builder-title" placeholder="e.g. Software Engineer" oninput="updateResumePaper()">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Email</label>
-                                <input class="form-control" type="email" id="builder-email" value="alex.rivera@gigflow.ai" oninput="updateResumePaper()">
+                                <input class="form-control" type="email" id="builder-email" placeholder="you@example.com" oninput="updateResumePaper()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CV Format</label>
+                                <select class="form-control" id="builder-format" onchange="toggleCvFormat()">
+                                    <option value="modern">Modern CV (Visual)</option>
+                                    <option value="ats">ATS CV (Plain Parsable)</option>
+                                </select>
                             </div>
                         </div>
 
@@ -83,9 +90,9 @@
                         </div>
                         <!-- Paper Sheet Frame -->
                         <div class="resume-paper" id="resume-paper-frame">
-                            <h2 id="paper-name">Alex Rivera</h2>
-                            <p class="resume-paper-subtitle" id="paper-title">Senior Product Designer</p>
-                            <p id="paper-email" style="font-size: 0.8rem; color: #64748b; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">alex.rivera@gigflow.ai &bull; San Francisco, CA &bull; portfolio.design</p>
+                            <h2 id="paper-name" style="color: var(--text-color);">Your Name</h2>
+                            <p class="resume-paper-subtitle" id="paper-title">Job Title</p>
+                            <p id="paper-email" style="font-size: 0.8rem; color: #64748b; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">you@example.com</p>
 
                             <div class="resume-paper-section">
                                 <h3 class="resume-paper-section-title">Employment History</h3>
@@ -110,20 +117,48 @@
     <script src="js/storage.js"></script>
     <script src="js/app.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userSession = JSON.parse(localStorage.getItem('gigflow_session'));
+            if (userSession) {
+                document.getElementById('builder-name').value = userSession.name || '';
+                document.getElementById('builder-email').value = userSession.email || '';
+                updateResumePaper();
+            }
+        });
+
         function updateResumePaper() {
-            document.getElementById('paper-name').textContent = document.getElementById('builder-name').value;
-            document.getElementById('paper-title').textContent = document.getElementById('builder-title').value;
-            document.getElementById('paper-email').textContent = `${document.getElementById('builder-email').value} | San Francisco | Portfolio`;
-            document.getElementById('paper-job-title').textContent = document.getElementById('builder-title').value;
-            document.getElementById('paper-employer').textContent = document.getElementById('builder-employer').value;
+            document.getElementById('paper-name').textContent = document.getElementById('builder-name').value || 'Your Name';
+            document.getElementById('paper-title').textContent = document.getElementById('builder-title').value || 'Job Title';
+            document.getElementById('paper-email').textContent = `${document.getElementById('builder-email').value || 'you@example.com'} | San Francisco | Portfolio`;
+            document.getElementById('paper-job-title').textContent = document.getElementById('builder-title').value || 'Job Title';
+            document.getElementById('paper-employer').textContent = document.getElementById('builder-employer').value || 'Employer Name';
             document.getElementById('paper-desc').textContent = document.getElementById('builder-responsibilities').value;
+        }
+
+        function toggleCvFormat() {
+            const format = document.getElementById('builder-format').value;
+            const paper = document.getElementById('resume-paper-frame');
+            if (format === 'ats') {
+                paper.style.fontFamily = 'Arial, sans-serif';
+                paper.style.color = '#000000';
+                paper.style.boxShadow = 'none';
+                paper.style.border = '1px solid #000';
+                document.getElementById('paper-name').style.color = '#000';
+            } else {
+                paper.style.fontFamily = 'var(--font-heading)';
+                paper.style.color = 'var(--text-color)';
+                paper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.08)';
+                paper.style.border = '1px solid var(--border-color)';
+                document.getElementById('paper-name').style.color = 'var(--text-color)';
+            }
+            showToast(`Switched to ${format.toUpperCase()} format`, 'info');
         }
 
         function optimizeResumeAI() {
             showToast('AI optimization in progress...', 'info');
             setTimeout(() => {
                 document.getElementById('resume-builder-score').textContent = '96%';
-                document.getElementById('builder-responsibilities').value += ' Integrated user testing with Framer to boost user conversions rate by 15%.';
+                document.getElementById('builder-responsibilities').value += ' Integrated user testing to boost conversions by 15%.';
                 updateResumePaper();
                 showToast('ATS Score optimized successfully!', 'success');
             }, 1200);
