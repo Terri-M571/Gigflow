@@ -219,31 +219,53 @@ function setupFilters() {
 
     if (!searchInput || !categorySelect) return;
 
+    let debounceTimeout;
     const applyFilters = () => {
-        const query = searchInput.value.toLowerCase();
-        const category = categorySelect.value;
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(async () => {
+            const query = searchInput.value.trim();
+            const category = categorySelect.value;
+            const q = category ? (query ? `${query} ${category}` : category) : (query || 'developer');
 
-        filteredJobs = allJobs.filter(job => {
-            const matchesQuery = job.title.toLowerCase().includes(query) || 
-                                 (job.company_name && job.company_name.toLowerCase().includes(query));
-            
-            const matchesCategory = category === '' || job.type.toLowerCase().includes(category.toLowerCase());
+            const listContainer = document.getElementById('job-list-container');
+            if (listContainer) {
+                listContainer.innerHTML = `
+                    <div style="padding: 32px; text-align: center; color: var(--text-muted);">
+                        <span class="material-symbols-outlined spinner" style="font-size: 32px; margin-bottom: 8px;">refresh</span>
+                        <p>Searching global jobs...</p>
+                    </div>
+                `;
+            }
 
-            return matchesQuery && matchesCategory;
-        });
+            try {
+                const res = await API.getJobs({ q: q, location: 'Remote' });
+                allJobs = res.jobs || [];
+                filteredJobs = [...allJobs];
 
-        if (window.innerWidth > 1024 && filteredJobs.length > 0) {
-            selectedJobId = filteredJobs[0].id;
-        } else {
-            selectedJobId = null;
-        }
+                if (window.innerWidth > 1024 && filteredJobs.length > 0) {
+                    selectedJobId = filteredJobs[0].id;
+                } else {
+                    selectedJobId = null;
+                }
 
-        renderJobList();
-        if (selectedJobId) {
-            renderJobDetails(selectedJobId);
-        } else if (window.innerWidth > 1024) {
-            showEmptyDetailsPane();
-        }
+                renderJobList();
+                if (selectedJobId) {
+                    renderJobDetails(selectedJobId);
+                } else if (window.innerWidth > 1024) {
+                    showEmptyDetailsPane();
+                }
+            } catch (err) {
+                console.error("Failed to search jobs:", err);
+                if (listContainer) {
+                    listContainer.innerHTML = `
+                        <div style="padding: 32px; text-align: center; color: var(--error);">
+                            <span class="material-symbols-outlined" style="font-size: 32px; margin-bottom: 8px;">error</span>
+                            <p>Failed to retrieve jobs.</p>
+                        </div>
+                    `;
+                }
+            }
+        }, 500); // 500ms debounce
     };
 
     searchInput.addEventListener('input', applyFilters);

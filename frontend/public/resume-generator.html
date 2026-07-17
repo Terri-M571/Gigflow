@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigFlow - AI Resume Architect</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
+    
+    <!-- HTML2PDF for exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Marked for Markdown parsing if AI returns markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in" style="height: calc(100vh - 100px); padding-bottom: 0;">
+            <div class="resume-builder-grid">
+                <!-- Left Edit Pane -->
+                <div class="resume-editor">
+                    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <h1 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;">Resume Architect</h1>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Fill in your details to compile your paper preview live</p>
+                        </div>
+                        <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;" onclick="resumeBuilder.autoFillFromProfile()">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">person_search</span> Auto-Fill
+                        </button>
+                    </div>
+
+                    <!-- AI Optimization bar -->
+                    <div class="card" style="padding: 16px; background-color: var(--primary-container); border-color: var(--primary); margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="material-symbols-outlined" style="color: var(--primary); font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                                <span style="font-size: 0.9rem; font-weight: 700;">AI Generator</span>
+                            </div>
+                            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem;" onclick="resumeBuilder.generateAIResume()" id="btn-ai-generate">Generate Resume</button>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600;">Target Job Description (Optional for ATS match)</label>
+                            <textarea class="form-control" id="builder-jd" rows="2" placeholder="Paste the job description you are applying for to tailor the resume..."></textarea>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <!-- Section 1 -->
+                        <div class="card" style="padding: 24px;">
+                            <h3 style="font-size: 1.05rem; margin-bottom: 16px;">Personal Information</h3>
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input class="form-control" type="text" id="builder-name" placeholder="Your Name" oninput="resumeBuilder.updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Target Job Title</label>
+                                <input class="form-control" type="text" id="builder-title" placeholder="e.g. Software Engineer" oninput="resumeBuilder.updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input class="form-control" type="email" id="builder-email" placeholder="you@example.com" oninput="resumeBuilder.updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Location</label>
+                                <input class="form-control" type="text" id="builder-location" placeholder="City, Country" oninput="resumeBuilder.updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Professional Summary</label>
+                                <div style="position: relative;">
+                                    <textarea class="form-control" id="builder-summary" rows="3" placeholder="Brief overview of your career..." oninput="resumeBuilder.updatePreview()"></textarea>
+                                    <button class="btn btn-icon" style="position: absolute; bottom: 8px; right: 8px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--primary); padding: 4px; border-radius: 4px;" onclick="resumeBuilder.improveText('summary')" title="Improve with AI">
+                                        <span class="material-symbols-outlined" style="font-size: 1.1rem;">auto_awesome</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Experience -->
+                        <div class="card" style="padding: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="font-size: 1.05rem; margin: 0;">Work Experience</h3>
+                                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" onclick="resumeBuilder.addExperience()">+ Add Role</button>
+                            </div>
+                            <div id="experience-list" style="display: flex; flex-direction: column; gap: 16px;">
+                                <!-- Rendered dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Skills -->
+                        <div class="card" style="padding: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="font-size: 1.05rem; margin: 0;">Skills</h3>
+                                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; color: var(--primary); border-color: var(--primary);" onclick="resumeBuilder.suggestSkills()"><span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: bottom;">auto_awesome</span> AI Suggest</button>
+                            </div>
+                            <div class="form-group">
+                                <input class="form-control" type="text" id="builder-skills" placeholder="Comma separated skills e.g. React, Node.js, Python" oninput="resumeBuilder.updatePreview()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Live Preview Pane -->
+                <div class="resume-preview-pane">
+                    <div style="width: 100%; display: flex; flex-direction: column; gap: 16px; align-items: center;">
+                        <div style="width: 100%; display: flex; justify-content: space-between; gap: 12px; align-items: center;">
+                            <div class="form-group" style="margin-bottom: 0; min-width: 180px;">
+                                <select class="form-control" id="builder-format" onchange="resumeBuilder.toggleCvFormat()">
+                                    <option value="modern">Modern CV (Visual)</option>
+                                    <option value="ats">ATS CV (Plain)</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-outline" style="padding: 6px 12px;" onclick="resumeBuilder.saveDraft()" id="btn-save">Save Draft</button>
+                                <button class="btn btn-outline" style="padding: 6px 12px; border-color: var(--primary); color: var(--primary);" onclick="resumeBuilder.exportDOCX()">Export DOCX</button>
+                                <button class="btn btn-primary" style="padding: 6px 12px;" onclick="resumeBuilder.exportPDF()">Export PDF</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Paper Sheet Frame -->
+                        <div class="resume-paper" id="resume-paper-frame">
+                            <h2 id="paper-name" style="color: var(--text-color); margin-bottom: 4px;">Your Name</h2>
+                            <p class="resume-paper-subtitle" id="paper-title" style="margin-bottom: 8px;">Job Title</p>
+                            <p id="paper-contact" style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">you@example.com | Location</p>
+
+                            <div class="resume-paper-section" style="margin-bottom: 16px;">
+                                <h3 class="resume-paper-section-title">Summary</h3>
+                                <p id="paper-summary" style="font-size: 0.85rem; color: #475569; line-height: 1.5;"></p>
+                            </div>
+
+                            <div class="resume-paper-section" style="margin-bottom: 16px;">
+                                <h3 class="resume-paper-section-title">Employment History</h3>
+                                <div id="paper-experience-list">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="resume-paper-section">
+                                <h3 class="resume-paper-section-title">Skills</h3>
+                                <p id="paper-skills" style="font-size: 0.85rem; color: #475569; line-height: 1.5;"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/resume-generator.js"></script>
+</body>
+</html>

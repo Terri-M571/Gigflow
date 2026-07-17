@@ -2,6 +2,82 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const pool = require('../config/db');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
+const fs = require('fs');
+const path = require('path');
+const { Document, Packer, Paragraph, TextRun, HeadingLevel } = require('docx');
+
+// Configure upload directories
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+const resumesDir = path.join(uploadDir, 'resumes');
+if (!fs.existsSync(resumesDir)) {
+    fs.mkdirSync(resumesDir, { recursive: true });
+}
+const portfoliosDir = path.join(uploadDir, 'portfolios');
+if (!fs.existsSync(portfoliosDir)) {
+    fs.mkdirSync(portfoliosDir, { recursive: true });
+}
+
+// Multer Storage Configuration
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        if (file.fieldname === 'resume') {
+            cb(null, resumesDir);
+        } else if (file.fieldname === 'portfolio') {
+            cb(null, portfoliosDir);
+        } else {
+            cb(null, uploadDir);
+        }
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (file.fieldname === 'resume') {
+            const allowed = ['.pdf', '.docx'];
+            if (allowed.includes(ext)) {
+                cb(null, true);
+            } else {
+                cb(new Error('Only PDF and DOCX formats are supported for resumes.'));
+            }
+        } else if (file.fieldname === 'portfolio') {
+            const allowed = ['.pdf', '.pptx'];
+            if (allowed.includes(ext)) {
+                cb(null, true);
+            } else {
+                cb(new Error('Only PDF and PPTX formats are supported for portfolio decks.'));
+            }
+        } else {
+            cb(null, true);
+        }
+    }
+});
+
+// Helper function to extract text from files
+async function extractTextFromFile(filePath, originalName) {
+    const ext = path.extname(originalName).toLowerCase();
+    if (ext === '.pdf') {
+        const dataBuffer = fs.readFileSync(filePath);
+        const data = await pdfParse(dataBuffer);
+        return data.text;
+    } else if (ext === '.docx') {
+        const result = await mammoth.extractRawText({ path: filePath });
+        return result.value;
+    }
+    return '';
+}
 
 // Helper function to query Gemini API if GEMINI_API_KEY is available
 async function callGemini(prompt, systemInstruction = '') {
@@ -61,7 +137,7 @@ router.get('/profile', auth, async (req, res) => {
 });
 
 router.put('/profile', auth, async (req, res) => {
-    const { full_name, industry, skills, experience_level, country, city, portfolio_url, linkedin_url, career_interests } = req.body;
+    const { full_name, industry, skills, experience_level, country, city, portfolio_url, linkedin_url, career_interests, role, is_complete } = req.body;
 
     try {
         const result = await pool.query(
@@ -74,16 +150,198 @@ router.put('/profile', auth, async (req, res) => {
                  city = COALESCE($6, city), 
                  portfolio_url = COALESCE($7, portfolio_url), 
                  linkedin_url = COALESCE($8, linkedin_url),
-                 career_interests = COALESCE($9, career_interests)
-             WHERE user_id = $10 
+                 career_interests = COALESCE($9, career_interests),
+                 role = COALESCE($10, role),
+                 is_complete = COALESCE($11, is_complete)
+             WHERE user_id = $12 
              RETURNING *`,
-            [full_name, industry, skills, experience_level, country, city, portfolio_url, linkedin_url, career_interests, req.user.id]
+            [full_name, industry, skills, experience_level, country, city, portfolio_url, linkedin_url, career_interests, role, (is_complete === true ? 1 : (is_complete === false ? 0 : null)), req.user.id]
         );
 
         res.json({ success: true, profile: result.rows[0], message: 'Profile updated successfully!' });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// ==========================================
+// RESUME UPLOAD & MANAGEMENT
+// ==========================================
+router.post('/profile/resume', auth, upload.single('resume'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No file uploaded or file type is unsupported' });
+    }
+
+    try {
+        const filePath = req.file.path;
+        const fileName = req.file.originalname;
+        const relativeUrl = `/uploads/resumes/${req.file.filename}`;
+
+        // Extract text from the resume
+        let extractedText = '';
+        try {
+            extractedText = await extractTextFromFile(filePath, fileName);
+        } catch (parseErr) {
+            console.error('Failed to parse resume text:', parseErr.message);
+        }
+
+        let parsedData = {};
+        if (extractedText) {
+            const prompt = `Extract the following details from this resume in strictly valid JSON format:
+{
+  "skills": ["skill1", "skill2"],
+  "experience_level": "one of: '0-2', '3-5', '5-10', '10+' based on years of experience",
+  "role": "Current or target job title",
+  "industry": "General industry category"
+}
+Return ONLY JSON without markdown wrapping. 
+Resume text: ${extractedText.substring(0, 15000)}`;
+            try {
+                const aiResponse = await callGemini(prompt, "You are a resume parsing assistant.");
+                let cleanResponse = aiResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+                parsedData = JSON.parse(cleanResponse);
+            } catch (e) {
+                console.error("Failed to parse resume via AI", e);
+            }
+        }
+
+        // Save metadata and file path to profiles table
+        await pool.query(
+            `UPDATE profiles 
+             SET resume_url = $1, 
+                 resume_filename = $2, 
+                 resume_text = $3
+             WHERE user_id = $4`,
+            [relativeUrl, fileName, extractedText, req.user.id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Resume uploaded and processed successfully!',
+            resumeUrl: relativeUrl,
+            resumeFilename: fileName,
+            parsedData: parsedData
+        });
+    } catch (err) {
+        console.error('Resume upload error:', err.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+});
+
+router.delete('/profile/resume', auth, async (req, res) => {
+    try {
+        // Fetch current resume path
+        const profile = await pool.query('SELECT resume_url FROM profiles WHERE user_id = $1', [req.user.id]);
+        if (profile.rows.length > 0 && profile.rows[0].resume_url) {
+            const relUrl = profile.rows[0].resume_url;
+            const absolutePath = path.join(__dirname, '..', relUrl);
+            
+            // Delete file from disk
+            if (fs.existsSync(absolutePath)) {
+                fs.unlinkSync(absolutePath);
+            }
+        }
+
+        // Clear resume details in db
+        await pool.query(
+            `UPDATE profiles 
+             SET resume_url = NULL, 
+                 resume_filename = NULL, 
+                 resume_text = NULL
+             WHERE user_id = $1`,
+            [req.user.id]
+        );
+
+        res.json({ success: true, message: 'Resume deleted successfully!' });
+    } catch (err) {
+        console.error('Resume delete error:', err.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+});
+
+// ==========================================
+// RESUME BUILDER STATE MANAGEMENT
+// ==========================================
+router.get('/profile/resume-builder', auth, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT resume_builder_data FROM profiles WHERE user_id = $1', [req.user.id]);
+        res.json({ success: true, data: result.rows[0]?.resume_builder_data });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+router.put('/profile/resume-builder', auth, async (req, res) => {
+    const { data } = req.body;
+    try {
+        await pool.query(
+            'UPDATE profiles SET resume_builder_data = $1 WHERE user_id = $2',
+            [data ? JSON.stringify(data) : null, req.user.id]
+        );
+        res.json({ success: true, message: 'Resume draft saved successfully!' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// ==========================================
+// PORTFOLIO UPLOAD & MANAGEMENT
+// ==========================================
+router.post('/profile/portfolio', auth, upload.single('portfolio'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No file uploaded or file type is unsupported' });
+    }
+
+    try {
+        const fileName = req.file.originalname;
+        const relativeUrl = `/uploads/portfolios/${req.file.filename}`;
+
+        // Save to profiles table
+        await pool.query(
+            `UPDATE profiles 
+             SET portfolio_url = $1
+             WHERE user_id = $2`,
+            [relativeUrl, req.user.id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Portfolio deck uploaded successfully!',
+            portfolioUrl: relativeUrl,
+            portfolioFilename: fileName
+        });
+    } catch (err) {
+        console.error('Portfolio upload error:', err.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+});
+
+router.delete('/profile/portfolio', auth, async (req, res) => {
+    try {
+        const profile = await pool.query('SELECT portfolio_url FROM profiles WHERE user_id = $1', [req.user.id]);
+        if (profile.rows.length > 0 && profile.rows[0].portfolio_url) {
+            const relUrl = profile.rows[0].portfolio_url;
+            const absolutePath = path.join(__dirname, '..', relUrl);
+            
+            if (fs.existsSync(absolutePath)) {
+                fs.unlinkSync(absolutePath);
+            }
+        }
+
+        await pool.query(
+            `UPDATE profiles 
+             SET portfolio_url = NULL
+             WHERE user_id = $1`,
+            [req.user.id]
+        );
+
+        res.json({ success: true, message: 'Portfolio deck deleted successfully!' });
+    } catch (err) {
+        console.error('Portfolio delete error:', err.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 });
 
@@ -381,6 +639,44 @@ router.post('/ai/resume', auth, async (req, res) => {
     res.json({ success: true, suggestion });
 });
 
+router.post('/ai/resume/generate', auth, async (req, res) => {
+    const { title, bio, skills, jobDescription } = req.body;
+    let prompt = `User Title: ${title}\nBio: ${bio}\nSkills: ${skills ? skills.join(', ') : 'None provided'}\n`;
+    if (jobDescription) {
+        prompt += `Target Job Description: ${jobDescription}\nTailor the summary and experience specifically to match this job description closely and pass ATS systems.\n`;
+    }
+    prompt += `Generate a professional summary (3-4 sentences) and 3 high-impact bullet points of hypothetical relevant experience for a resume targeting this title. Format as JSON: {"summary": "...", "experienceBullets": ["...", "...", "..."]}`;
+    const sysInstruction = `You are an elite executive resume consultant. Output valid JSON only, without markdown wrappers.`;
+    
+    try {
+        const resultText = await callGemini(prompt, sysInstruction);
+        // Clean JSON in case model includes markdown wrappers
+        const cleaned = resultText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const data = JSON.parse(cleaned);
+        res.json({ success: true, generated: data });
+    } catch(e) {
+        res.status(500).json({ success: false, message: 'Failed to parse AI response' });
+    }
+});
+
+router.post('/ai/resume/improve', auth, async (req, res) => {
+    const { text, type } = req.body;
+    const prompt = `Rewrite the following ${type} to be more professional, action-oriented, and ATS-optimized:\n\n"${text}"`;
+    const sysInstruction = `You are a professional resume writer. Provide the improved text directly without conversational filler.`;
+    
+    const improvement = await callGemini(prompt, sysInstruction);
+    res.json({ success: true, improvement });
+});
+
+router.post('/ai/resume/skills', auth, async (req, res) => {
+    const { title } = req.body;
+    const prompt = `List 8 high-impact technical and soft skills for a "${title}" resume. Return ONLY a comma-separated list of the skills.`;
+    const sysInstruction = `You are an expert recruiter. Return a single comma-separated list without bullets or numbering.`;
+    
+    const skillsList = await callGemini(prompt, sysInstruction);
+    res.json({ success: true, skills: skillsList.split(',').map(s => s.trim()) });
+});
+
 // ATS checker
 router.post('/ai/ats-check', auth, async (req, res) => {
     const { resumeText, jobDescription } = req.body;
@@ -393,14 +689,131 @@ router.post('/ai/ats-check', auth, async (req, res) => {
 
 // AI Cover Letter Generator
 router.post('/ai/cover-letter', auth, async (req, res) => {
-    const { jobTitle, companyName, profileSummary } = req.body;
-    const prompt = `Write a professional cover letter.
-    Target Job: ${jobTitle}
-    Target Company: ${companyName}
-    My Profile Background: ${profileSummary}`;
+    const { jobTitle, companyName, profileSummary, jobId } = req.body;
     
-    const letter = await callGemini(prompt, 'You are a career strategist. Draft a highly compelling, personalized cover letter that highlights standard engineering/design values.');
-    res.json({ success: true, letter });
+    try {
+        // Fetch user resume text and profile details for deep context
+        const profileRes = await pool.query('SELECT resume_text, skills, experience_level FROM profiles WHERE user_id = $1', [req.user.id]);
+        const profile = profileRes.rows[0] || {};
+        
+        let jobDetails = '';
+        if (jobId) {
+            const jobRes = await pool.query('SELECT title, description FROM jobs WHERE id = $1', [jobId]);
+            if (jobRes.rows.length > 0) {
+                jobDetails = `Job Title: ${jobRes.rows[0].title}\nJob Description:\n${jobRes.rows[0].description}`;
+            }
+        } else if (jobTitle && companyName) {
+            jobDetails = `Job Title: ${jobTitle} at ${companyName}`;
+        }
+
+        const contextPrompt = `
+        User Resume Text:\n${profile.resume_text || 'None uploaded'}\n
+        User Bio/Summary:\n${profileSummary || 'None provided'}\n
+        User Experience Level: ${profile.experience_level || 'Not provided'}\n
+        User Skills: ${profile.skills ? profile.skills.join(', ') : 'Not provided'}\n
+        Target Job Context:\n${jobDetails || 'Not provided'}\n
+        
+        Write an elite, highly personalized cover letter tailored specifically to the user's credentials and the target job description. The tone should be extremely professional, high-impact, and organic (avoiding robotic AI platitudes).
+        `;
+
+        const letter = await callGemini(contextPrompt, 'You are an expert executive coach. Draft a compelling cover letter that maps the candidate\'s achievements directly to the job needs.');
+
+        // Save generated letter in history automatically
+        const id = require('crypto').randomUUID();
+        const saveTitle = `Cover Letter - ${jobTitle || 'General'} (${companyName || 'Application'})`;
+        await pool.query(
+            `INSERT INTO cover_letters (id, user_id, job_id, title, content) 
+             VALUES ($1, $2, $3, $4, $5)`,
+            [id, req.user.id, jobId || null, saveTitle, letter]
+        );
+
+        res.json({ success: true, letter, id });
+    } catch (e) {
+        console.error('AI Cover Letter Generation failed:', e.message);
+        res.status(500).json({ success: false, message: 'Failed to generate cover letter.' });
+    }
+});
+
+// ==========================================
+// COVER LETTER DATABASE CRUD
+// ==========================================
+router.get('/cover-letters', auth, async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT cl.*, j.title as job_title, c.name as company_name 
+             FROM cover_letters cl
+             LEFT JOIN jobs j ON cl.job_id = j.id
+             LEFT JOIN companies c ON j.company_id = c.id
+             WHERE cl.user_id = $1
+             ORDER BY cl.created_at DESC`,
+            [req.user.id]
+        );
+        res.json({ success: true, coverLetters: result.rows });
+    } catch (err) {
+        console.error('Fetch cover letters error:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+router.post('/cover-letters', auth, async (req, res) => {
+    const { jobId, title, content } = req.body;
+    if (!content) {
+        return res.status(400).json({ success: false, message: 'Cover letter content is required' });
+    }
+    try {
+        const id = require('crypto').randomUUID();
+        const result = await pool.query(
+            `INSERT INTO cover_letters (id, user_id, job_id, title, content) 
+             VALUES ($1, $2, $3, $4, $5) 
+             RETURNING *`,
+            [id, req.user.id, jobId || null, title || 'Untitled Cover Letter', content]
+        );
+        res.status(201).json({ success: true, coverLetter: result.rows[0], message: 'Cover letter saved!' });
+    } catch (err) {
+        console.error('Save cover letter error:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+router.put('/cover-letters/:id', auth, async (req, res) => {
+    const { title, content } = req.body;
+    if (!content) {
+        return res.status(400).json({ success: false, message: 'Cover letter content is required' });
+    }
+    try {
+        const result = await pool.query(
+            `UPDATE cover_letters 
+             SET title = COALESCE($1, title), 
+                 content = $2, 
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $3 AND user_id = $4 
+             RETURNING *`,
+            [title, content, req.params.id, req.user.id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Cover letter not found' });
+        }
+        res.json({ success: true, coverLetter: result.rows[0], message: 'Cover letter updated!' });
+    } catch (err) {
+        console.error('Update cover letter error:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+router.delete('/cover-letters/:id', auth, async (req, res) => {
+    try {
+        const result = await pool.query(
+            `DELETE FROM cover_letters WHERE id = $1 AND user_id = $2 RETURNING *`,
+            [req.params.id, req.user.id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Cover letter not found' });
+        }
+        res.json({ success: true, message: 'Cover letter deleted successfully!' });
+    } catch (err) {
+        console.error('Delete cover letter error:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 });
 
 // AI Career Coach
@@ -433,6 +846,87 @@ router.post('/ai/interview', auth, async (req, res) => {
     
     const evaluation = await callGemini(prompt, sysInstruction);
     res.json({ success: true, evaluation });
+});
+
+// ==========================================
+// SECURE GLOBAL JOBS API (Proxy for Indeed/CareerJet)
+// ==========================================
+router.get('/jobs/search', auth, async (req, res) => {
+    const { q = 'developer', location = 'Remote', page = 1 } = req.query;
+    
+    // Check if the server has configured a real API key in .env (keeping it private from frontend)
+    const careerjetKey = process.env.CAREERJET_API_KEY;
+    const indeedKey = process.env.INDEED_PUBLISHER_ID;
+
+    try {
+        if (careerjetKey) {
+            // Live CareerJet Integration (Private & Secure)
+            const response = await fetch(`https://www.careerjet.com/partners/api/?keywords=${encodeURIComponent(q)}&location=${encodeURIComponent(location)}&page=${page}&affid=${careerjetKey}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+            return res.json({ success: true, source: 'careerjet', jobs: data.jobs || [] });
+        } else if (indeedKey) {
+            // Live Indeed Integration (Private & Secure)
+            const response = await fetch(`https://www.indeed.com/publisher?publisher=${indeedKey}&q=${encodeURIComponent(q)}&l=${encodeURIComponent(location)}&v=2&format=json`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+            return res.json({ success: true, source: 'indeed', jobs: data.results || [] });
+        } else {
+            // Fallback mock realistic data for development if keys are not present
+            const mockJobs = [
+                { id: '1', title: \`Senior \${q || 'Software'} Engineer\`, company: 'TechCorp Global', location: location || 'Remote', type: 'Full-time', salary: '$120k - $150k', posted: '2 days ago', description: 'Lead the development of scalable applications.', is_applied: false },
+                { id: '2', title: \`Mid-level \${q || 'Frontend'} Developer\`, company: 'StartupX', location: location || 'Remote', type: 'Contract', salary: '$90k - $110k', posted: '5 hours ago', description: 'Build beautiful UIs with React and Node.js.', is_applied: true },
+                { id: '3', title: \`\${q || 'Product'} Manager\`, company: 'Innovate LLC', location: 'New York, NY (Hybrid)', type: 'Full-time', salary: '$130k - $160k', posted: '1 week ago', description: 'Drive product strategy and execution.', is_applied: false }
+            ];
+            return res.json({ success: true, source: 'mock', jobs: mockJobs });
+        }
+    } catch (err) {
+        console.error('Jobs Search API error:', err.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+});
+
+// ==========================================
+// RESUME EXPORT DOCX
+// ==========================================
+router.post('/resume/export-docx', auth, async (req, res) => {
+    try {
+        const data = req.body;
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: [
+                    new Paragraph({ text: data.name || 'Your Name', heading: HeadingLevel.HEADING_1 }),
+                    new Paragraph({ text: data.title || 'Job Title', heading: HeadingLevel.HEADING_2 }),
+                    new Paragraph({ text: `${data.email || ''} | ${data.location || ''}` }),
+                    new Paragraph({ text: '' }),
+                    new Paragraph({ text: 'Summary', heading: HeadingLevel.HEADING_3 }),
+                    new Paragraph({ text: data.summary || '' }),
+                    new Paragraph({ text: '' }),
+                    new Paragraph({ text: 'Experience', heading: HeadingLevel.HEADING_3 }),
+                    ...(data.experience || []).flatMap(exp => [
+                        new Paragraph({ children: [new TextRun({ text: exp.title + ' | ' + exp.company, bold: true })] }),
+                        new Paragraph({ text: exp.responsibilities || '' }),
+                        new Paragraph({ text: '' })
+                    ]),
+                    new Paragraph({ text: 'Skills', heading: HeadingLevel.HEADING_3 }),
+                    new Paragraph({ text: data.skills || '' }),
+                ],
+            }],
+        });
+
+        const buffer = await Packer.toBuffer(doc);
+        res.setHeader('Content-Disposition', 'attachment; filename=Resume.docx');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        res.send(buffer);
+    } catch (err) {
+        console.error('DOCX Export error:', err);
+        res.status(500).send('Error generating DOCX');
+    }
 });
 
 module.exports = router;

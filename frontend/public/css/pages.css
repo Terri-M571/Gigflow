@@ -238,7 +238,7 @@
     border-radius: var(--border-radius-full);
 }
 
-/* 3. RESUME BUILDER GRID & SPLIT VIEW (resume-builder.html) */
+/* 3. RESUME BUILDER GRID & SPLIT VIEW (resume-generator.html) */
 .resume-builder-grid {
     display: grid;
     grid-template-columns: 5fr 7fr;

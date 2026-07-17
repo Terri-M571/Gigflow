@@ -7,7 +7,7 @@ const PRICING_DATA = {
         free: [
             "5 Resume Scans per month",
             "ATS Score",
-            "Resume Builder",
+            "Resume Generator",
             "Resume Manager",
             "Job Tracker",
             "Thank You Notes"
@@ -16,7 +16,7 @@ const PRICING_DATA = {
             "Unlimited Resume Scans",
             "AI Resume Optimization",
             "AI Cover Letter Generator",
-            "AI Resume Builder",
+            "AI Resume Generator",
             "AI Bullet Point Generator",
             "ATS Resume Checker",
             "AI Job Match",
@@ -31,38 +31,38 @@ const PRICING_DATA = {
         ]
     },
     plans: {
-        free: {
-            id: 'plan_free',
-            name: 'Free Plan',
+        monthly: {
+            id: 'plan_monthly',
+            name: 'Monthly Plan',
             price: {
-                USD: { amount: 0, text: '$0', period: '' },
-                KES: { amount: 0, text: 'KSh 0', period: '' }
+                USD: { amount: 9.99, text: '$9.99', period: '/month', subtext: 'Billed monthly' },
+                KES: { amount: 999, text: 'KSh 999', period: '/month', subtext: 'Billed monthly' }
             },
             badge: null,
-            buttonText: 'Get Started Free',
-            buttonAction: 'location.href="dashboard.html"'
+            buttonText: 'Subscribe Monthly',
+            buttonAction: 'openSubscriptionModal("plan_monthly")'
         },
         quarterly: {
             id: 'plan_quarterly',
             name: 'Quarterly Plan',
             price: {
-                USD: { amount: 29.99, text: '$29.99', period: '/month', subtext: 'Billed every 3 months' },
-                KES: { amount: 3900, text: 'KSh 3,900', period: '/month', subtext: 'Billed KSh 11,700 every 3 months' }
+                USD: { amount: 24.99, text: '$24.99', period: '/quarter', subtext: 'Save 16% over monthly' },
+                KES: { amount: 2500, text: 'KSh 2,500', period: '/quarter', subtext: 'Save 16% over monthly' }
             },
             badge: 'Most Popular',
-            buttonText: 'Start 7-Day Free Trial',
+            buttonText: 'Subscribe Quarterly',
             buttonAction: 'openSubscriptionModal("plan_quarterly")'
         },
-        monthly: {
-            id: 'plan_monthly',
-            name: 'Monthly Plan',
+        annual: {
+            id: 'plan_annual',
+            name: 'Annual Plan',
             price: {
-                USD: { amount: 49.99, text: '$49.99', period: '/month', subtext: '' },
-                KES: { amount: 6500, text: 'KSh 6,500', period: '/month', subtext: '' }
+                USD: { amount: 89.99, text: '$89.99', period: '/year', subtext: 'Save 25% over monthly' },
+                KES: { amount: 8999, text: 'KSh 8,999', period: '/year', subtext: 'Save 25% over monthly' }
             },
-            badge: null,
-            buttonText: 'Subscribe Now',
-            buttonAction: 'openSubscriptionModal("plan_monthly")'
+            badge: 'Best Value',
+            buttonText: 'Subscribe Annually',
+            buttonAction: 'openSubscriptionModal("plan_annual")'
         }
     }
 };
@@ -107,8 +107,9 @@ function initCurrency() {
 
 function renderPricing() {
     // Free Plan
-    const freePrice = PRICING_DATA.plans.free.price[currentCurrency];
-    document.getElementById('price-free').innerHTML = `<span>${freePrice.text}</span>`;
+    const monthlyPrice = PRICING_DATA.plans.monthly.price[currentCurrency];
+    document.getElementById('price-monthly').innerHTML = `<span>${monthlyPrice.text}</span><span class="period">${monthlyPrice.period}</span>`;
+    document.getElementById('subtext-monthly').textContent = monthlyPrice.subtext;
     
     // Quarterly Plan
     const qPrice = PRICING_DATA.plans.quarterly.price[currentCurrency];
@@ -116,9 +117,9 @@ function renderPricing() {
     document.getElementById('subtext-quarterly').textContent = qPrice.subtext;
 
     // Monthly Plan
-    const mPrice = PRICING_DATA.plans.monthly.price[currentCurrency];
-    document.getElementById('price-monthly').innerHTML = `<span>${mPrice.text}</span><span class="period">${mPrice.period}</span>`;
-    document.getElementById('subtext-monthly').textContent = mPrice.subtext;
+    const annualPrice = PRICING_DATA.plans.annual.price[currentCurrency];
+    document.getElementById('price-annual').innerHTML = `<span>${annualPrice.text}</span><span class="period">${annualPrice.period}</span>`;
+    document.getElementById('subtext-annual').textContent = annualPrice.subtext;
 
     // Update Modal Curriculum Text if open
     document.getElementById('modal-currency-display').textContent = currentCurrency;

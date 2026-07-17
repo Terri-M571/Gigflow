@@ -38,6 +38,9 @@ CREATE TABLE profiles (
     portfolio_url TEXT,
     linkedin_url TEXT,
     career_interests TEXT[],
+    role VARCHAR(100),
+    resume_builder_data TEXT,
+    is_complete BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -130,6 +133,19 @@ CREATE TABLE saved_jobs (
     job_id UUID REFERENCES jobs(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, job_id)
+);
+
+-- ==========================================
+-- COVER LETTERS TABLE
+-- ==========================================
+CREATE TABLE IF NOT EXISTS cover_letters (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    job_id UUID REFERENCES jobs(id) ON DELETE SET NULL,
+    title VARCHAR(255),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================

@@ -11,7 +11,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Auto-redirect authenticated users away from login/signup pages
     if (isLoggedIn()) {
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-        if (currentPage === 'login.html' || currentPage === 'signup.html') {
+        const isComplete = window.currentUser.is_complete === true || String(window.currentUser.is_complete) === '1' || String(window.currentUser.is_complete).toLowerCase() === 'true';
+
+        // If profile is NOT complete, force them to onboarding
+        if (!isComplete && currentPage !== 'onboarding.html') {
+            window.location.href = 'onboarding.html';
+            return;
+        }
+        
+        // If profile IS complete, prevent access to auth pages & onboarding
+        if (isComplete && (currentPage === 'login.html' || currentPage === 'signup.html' || currentPage === 'onboarding.html')) {
             window.location.href = 'dashboard.html';
             return;
         }
@@ -112,7 +121,7 @@ function injectLayouts() {
                         ${navLink('index.html',         'Home')}
                         ${navLink('jobs.html',           'Jobs',           ['job-details.html'])}
                         ${navLink('freelance.html',      'Freelance',      ['project-details.html'])}
-                        ${navLink('resume-builder.html', 'Resume Builder')}
+                        ${navLink('resume-generator.html', 'Resume Generator')}
                         ${navLink('learning.html',       'Learning Hub')}
                     </div>
                     <div class="navbar-actions">
@@ -155,37 +164,43 @@ function injectLayouts() {
                     </a>
                     <a href="jobs.html" class="sidebar-link ${currentFile === 'jobs.html' || currentFile === 'job-details.html' ? 'active' : ''}">
                         <span class="material-symbols-outlined">search</span>
-                        <span>Job Search</span>
+                        <span>Jobs</span>
                     </a>
-                    <a href="jobs.html?saved=true" class="sidebar-link ${currentFile === 'jobs.html' && window.location.search.includes('saved') ? 'active' : ''}">
-                        <span class="material-symbols-outlined">bookmark</span>
-                        <span>Saved Jobs</span>
-                    </a>
-                    <a href="application-tracker.html" class="sidebar-link ${currentFile === 'application-tracker.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">assignment_turned_in</span>
-                        <span>Applications</span>
-                    </a>
-
+                    
                     <span class="sidebar-group-title">AI Tools</span>
-                    <a href="resume-builder.html" class="sidebar-link ${currentFile === 'resume-builder.html' ? 'active' : ''}">
+                    <a href="resume-generator.html" class="sidebar-link ${currentFile === 'resume-generator.html' ? 'active' : ''}">
                         <span class="material-symbols-outlined">edit_note</span>
-                        <span>Resume Builder</span>
+                        <span>Resume Generator</span>
+                    </a>
+                    <a href="ats-checker.html" class="sidebar-link ${currentFile === 'ats-checker.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">fact_check</span>
+                        <span>ATS Checker</span>
                     </a>
                     <a href="cover-letter.html" class="sidebar-link ${currentFile === 'cover-letter.html' ? 'active' : ''}">
                         <span class="material-symbols-outlined">description</span>
                         <span>Cover Letter Generator</span>
                     </a>
-                    <a href="interview-prep.html" class="sidebar-link ${currentFile === 'interview-prep.html' || currentFile === 'ai-interview.html' ? 'active' : ''}">
+                    <a href="ai-interview.html" class="sidebar-link ${currentFile === 'ai-interview.html' || currentFile === 'interview-prep.html' ? 'active' : ''}">
                         <span class="material-symbols-outlined">psychology</span>
-                        <span>Interview Coach</span>
+                        <span>AI Interview</span>
+                    </a>
+                    
+                    <span class="sidebar-group-title">Career Hub</span>
+                    <a href="career-path.html" class="sidebar-link ${currentFile === 'career-path.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">route</span>
+                        <span>Career Path</span>
+                    </a>
+                    <a href="application-tracker.html" class="sidebar-link ${currentFile === 'application-tracker.html' ? 'active' : ''}">
+                        <span class="material-symbols-outlined">assignment_turned_in</span>
+                        <span>Applications</span>
+                    </a>
+                    <a href="jobs.html?saved=true" class="sidebar-link ${currentFile === 'jobs.html' && window.location.search.includes('saved') ? 'active' : ''}">
+                        <span class="material-symbols-outlined">bookmark</span>
+                        <span>Saved Jobs</span>
                     </a>
                     <a href="learning.html" class="sidebar-link ${currentFile === 'learning.html' ? 'active' : ''}">
                         <span class="material-symbols-outlined">school</span>
-                        <span>Career Roadmap</span>
-                    </a>
-                    <a href="portfolio.html" class="sidebar-link ${currentFile === 'portfolio.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">folder_shared</span>
-                        <span>Portfolio Review</span>
+                        <span>Learning</span>
                     </a>
 
                     <span class="sidebar-group-title">Account</span>
@@ -193,11 +208,7 @@ function injectLayouts() {
                         <span class="material-symbols-outlined">person</span>
                         <span>Profile</span>
                     </a>
-                    <a href="pricing.html" class="sidebar-link ${currentFile === 'pricing.html' ? 'active' : ''}">
-                        <span class="material-symbols-outlined">workspace_premium</span>
-                        <span>Subscription</span>
-                    </a>
-                    <a href="settings.html" class="sidebar-link ${currentFile === 'settings.html' ? 'active' : ''}">
+                    <a href="settings.html" class="sidebar-link ${currentFile === 'settings.html' || currentFile === 'pricing.html' ? 'active' : ''}">
                         <span class="material-symbols-outlined">settings</span>
                         <span>Settings</span>
                     </a>
@@ -232,7 +243,7 @@ function injectLayouts() {
                         <h4 style="font-size: 1rem; margin-bottom: 16px;">AI Toolbox</h4>
                         <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
                             <li><a href="ats-checker.html" style="color: var(--text-muted);">ATS Keyword Review</a></li>
-                            <li><a href="resume-builder.html" style="color: var(--text-muted);">AI Resume Builder</a></li>
+                            <li><a href="resume-generator.html" style="color: var(--text-muted);">AI Resume Generator</a></li>
                             <li><a href="cover-letter.html" style="color: var(--text-muted);">AI Cover Letters</a></li>
                             <li><a href="interview-prep.html" style="color: var(--text-muted);">Mock Interview Engine</a></li>
                         </ul>

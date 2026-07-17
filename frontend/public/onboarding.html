@@ -98,6 +98,7 @@
             cursor: pointer;
             transition: var(--transition);
             background: var(--surface-low);
+            position: relative;
         }
         .drag-drop-zone:hover, .drag-drop-zone.dragover {
             border-color: var(--primary);
@@ -143,16 +144,11 @@
         <div class="step" id="step-2">
             <h2>What role are you looking for?</h2>
             <p>We'll tailor jobs and roadmaps to this path.</p>
-            <div class="form-group">
-                <select class="form-control" id="ob-role">
-                    <option value="" disabled selected>Select a role...</option>
-                    <option value="Software Engineer">Software Engineer</option>
-                    <option value="Product Designer">Product Designer (UI/UX)</option>
-                    <option value="Data Scientist">Data Scientist</option>
-                    <option value="Product Manager">Product Manager</option>
-                    <option value="Marketing Manager">Marketing Manager</option>
-                    <option value="Sales Executive">Sales Executive</option>
-                </select>
+            <div class="form-group" id="ob-role-container" style="position: relative;">
+                <div style="position: relative;">
+                    <input class="form-control" type="text" id="ob-role" placeholder="Search and select role..." required style="padding-right: 40px;">
+                    <span class="material-symbols-outlined dropdown-arrow" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; transition: transform 0.2s ease;">keyboard_arrow_down</span>
+                </div>
             </div>
             <div class="btn-group">
                 <button class="btn btn-outline" onclick="prevStep(1)">Back</button>
@@ -181,54 +177,11 @@
         <div class="step" id="step-4">
             <h2>Preferred industry</h2>
             <p>Where do you want to work?</p>
-            <div class="form-group">
-                <select class="form-control" id="ob-industry">
-                    <option value="" disabled selected>Select an industry...</option>
-                    <option value="Accounting & Auditing">Accounting & Auditing</option>
-                    <option value="Advertising & Marketing">Advertising & Marketing</option>
-                    <option value="Agriculture & Forestry">Agriculture & Forestry</option>
-                    <option value="Architecture & Planning">Architecture & Planning</option>
-                    <option value="Art & Design">Art & Design</option>
-                    <option value="Automotive & Mobility">Automotive & Mobility</option>
-                    <option value="Aviation & Aerospace">Aviation & Aerospace</option>
-                    <option value="Biotechnology & Pharmaceuticals">Biotechnology & Pharmaceuticals</option>
-                    <option value="Business Consulting">Business Consulting</option>
-                    <option value="Construction & Engineering">Construction & Engineering</option>
-                    <option value="Consumer Goods & FMCG">Consumer Goods & FMCG</option>
-                    <option value="Customer Service & Support">Customer Service & Support</option>
-                    <option value="Data Science & Analytics">Data Science & Analytics</option>
-                    <option value="Defense & Space">Defense & Space</option>
-                    <option value="E-commerce & Retail">E-commerce & Retail</option>
-                    <option value="Education & Training">Education & Training</option>
-                    <option value="Energy & Utilities">Energy & Utilities</option>
-                    <option value="Entertainment & Media">Entertainment & Media</option>
-                    <option value="Environmental Services">Environmental Services</option>
-                    <option value="Event Management">Event Management</option>
-                    <option value="Finance & Investment">Finance & Investment</option>
-                    <option value="Food & Beverages">Food & Beverages</option>
-                    <option value="Gaming & Esports">Gaming & Esports</option>
-                    <option value="Government & Public Policy">Government & Public Policy</option>
-                    <option value="Healthcare & Medical">Healthcare & Medical</option>
-                    <option value="Hospitality & Tourism">Hospitality & Tourism</option>
-                    <option value="Human Resources & Recruitment">Human Resources & Recruitment</option>
-                    <option value="Information Technology (IT)">Information Technology (IT)</option>
-                    <option value="Insurance">Insurance</option>
-                    <option value="Journalism & News">Journalism & News</option>
-                    <option value="Legal Services">Legal Services</option>
-                    <option value="Logistics & Supply Chain">Logistics & Supply Chain</option>
-                    <option value="Manufacturing & Production">Manufacturing & Production</option>
-                    <option value="Maritime & Shipping">Maritime & Shipping</option>
-                    <option value="Mining & Metals">Mining & Metals</option>
-                    <option value="Non-Profit & NGO">Non-Profit & NGO</option>
-                    <option value="Real Estate & Property">Real Estate & Property</option>
-                    <option value="Research & Development">Research & Development</option>
-                    <option value="Software & SaaS">Software & SaaS</option>
-                    <option value="Sports & Fitness">Sports & Fitness</option>
-                    <option value="Telecommunications">Telecommunications</option>
-                    <option value="Veterinary & Animal Care">Veterinary & Animal Care</option>
-                    <option value="Writing & Editing">Writing & Editing</option>
-                    <option value="Other">Other</option>
-                </select>
+            <div class="form-group" id="ob-industry-container" style="position: relative;">
+                <div style="position: relative;">
+                    <input class="form-control" type="text" id="ob-industry" placeholder="Search and select industry..." required style="padding-right: 40px;">
+                    <span class="material-symbols-outlined dropdown-arrow" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; transition: transform 0.2s ease;">keyboard_arrow_down</span>
+                </div>
             </div>
             <div class="btn-group">
                 <button class="btn btn-outline" onclick="prevStep(3)">Back</button>
@@ -279,24 +232,30 @@
 
         <!-- Step 7 -->
         <div class="step" id="step-7">
-            <h2>Upload Resume</h2>
+            <h2>Upload Resume <span style="color: var(--error); font-size: 0.95rem;">*Required</span></h2>
             <p>We'll parse your resume to build your profile automatically.</p>
-            <div class="drag-drop-zone" id="resume-drop">
-                <span class="material-symbols-outlined" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;">upload_file</span>
-                <h4>Drag & Drop your Resume</h4>
-                <p style="margin: 8px 0; font-size: 0.85rem;">Supports PDF, DOCX (Max 5MB)</p>
-                <button class="btn btn-outline btn-sm">Browse Files</button>
+            
+            <div class="drag-drop-zone" id="resume-drop-zone" onclick="document.getElementById('ob-resume-input').click()">
+                <span class="material-symbols-outlined" id="resume-icon" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;">upload_file</span>
+                <h4 id="resume-title">Drag & Drop your Resume</h4>
+                <p id="resume-info" style="margin: 8px 0; font-size: 0.85rem;">Supports PDF, DOCX (Max 5MB)</p>
+                <div id="resume-progress-container" style="display: none; width: 80%; margin: 12px auto; background: var(--border-color); height: 6px; border-radius: 3px; overflow: hidden;">
+                    <div id="resume-progress-bar" style="width: 0%; height: 100%; background: var(--primary);"></div>
+                </div>
+                <button type="button" class="btn btn-outline btn-sm" id="resume-browse-btn">Browse Files</button>
             </div>
+            <input type="file" id="ob-resume-input" accept=".pdf,.docx" style="display:none;">
+
             <div class="btn-group">
                 <button class="btn btn-outline" onclick="prevStep(6)">Back</button>
-                <button class="btn btn-primary" onclick="nextStep(8)">Upload & Continue</button>
+                <button class="btn btn-primary" onclick="validateResumeAndNext()">Upload & Continue</button>
             </div>
         </div>
 
         <!-- Step 8 -->
         <div class="step" id="step-8">
             <h2>Add Portfolio (Optional)</h2>
-            <p>Stand out by showcasing your work.</p>
+            <p>Stand out by showcasing your work deck.</p>
             <div class="form-group">
                 <label class="form-label">Portfolio Link (Website, Behance, GitHub)</label>
                 <div class="form-input-wrap">
@@ -304,10 +263,17 @@
                     <input type="url" class="form-input" id="ob-portfolio" placeholder="https://...">
                 </div>
             </div>
-            <div class="drag-drop-zone" style="padding: 24px; margin-top: 16px;">
-                <span class="material-symbols-outlined" style="font-size: 32px; color: var(--text-muted);">picture_as_pdf</span>
-                <h5 style="margin-top: 8px;">Or upload a PDF deck</h5>
+            
+            <div class="drag-drop-zone" id="portfolio-drop-zone" onclick="document.getElementById('ob-portfolio-input').click()" style="padding: 24px; margin-top: 16px;">
+                <span class="material-symbols-outlined" id="portfolio-icon" style="font-size: 32px; color: var(--text-muted);">picture_as_pdf</span>
+                <h5 id="portfolio-title" style="margin-top: 8px;">Or upload a PDF or PPTX deck</h5>
+                <p id="portfolio-info" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">PDF, PPTX (Max 5MB)</p>
+                <div id="portfolio-progress-container" style="display: none; width: 80%; margin: 12px auto; background: var(--border-color); height: 6px; border-radius: 3px; overflow: hidden;">
+                    <div id="portfolio-progress-bar" style="width: 0%; height: 100%; background: var(--primary);"></div>
+                </div>
             </div>
+            <input type="file" id="ob-portfolio-input" accept=".pdf,.pptx" style="display:none;">
+
             <div class="btn-group">
                 <button class="btn btn-outline" onclick="prevStep(7)">Back</button>
                 <button class="btn btn-primary" onclick="nextStep(9)">Next</button>
@@ -317,18 +283,18 @@
         <!-- Step 9 -->
         <div class="step" id="step-9">
             <h2>Select Skills</h2>
-            <p>Our AI scanned your resume and suggests these skills. Add any others.</p>
+            <p>Add technical skills that match your experience.</p>
             <div id="ob-skills-container" style="margin-bottom: 24px;">
                 <span class="skill-badge selected" onclick="toggleSkill(this)">React</span>
                 <span class="skill-badge selected" onclick="toggleSkill(this)">Node.js</span>
                 <span class="skill-badge selected" onclick="toggleSkill(this)">TypeScript</span>
                 <span class="skill-badge" onclick="toggleSkill(this)">Python</span>
                 <span class="skill-badge" onclick="toggleSkill(this)">Figma</span>
-                <span class="skill-badge" onclick="toggleSkill(this)">Data Analysis</span>
-                <span class="skill-badge" onclick="toggleSkill(this)">Agile</span>
+                <span class="skill-badge" onclick="toggleSkill(this)">SQL</span>
+                <span class="skill-badge" onclick="toggleSkill(this)">AWS</span>
             </div>
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Type a skill and press Enter...">
+                <input type="text" class="form-control" id="custom-skill-input" placeholder="Type a skill and press Enter...">
             </div>
             <div class="btn-group">
                 <button class="btn btn-outline" onclick="prevStep(8)">Back</button>
@@ -342,9 +308,27 @@
     <script src="js/storage.js"></script>
     <script src="js/api.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/dropdown.js"></script>
     <script>
+        let resumeUploaded = false;
+        let resumeFilename = '';
+        let portfolioUploaded = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupFileHandlers();
+            setupSkillsInput();
+            
+            // Initialize custom typeahead selectors
+            initSearchableDropdown('ob-role-container', 'ob-role', OCCUPATIONS, {
+                groupByCategory: true,
+                hiddenInputId: 'ob-role-value'
+            });
+            initSearchableDropdown('ob-industry-container', 'ob-industry', INDUSTRIES, {
+                hiddenInputId: 'ob-industry-value'
+            });
+        });
+
         function selectChoice(element, hiddenId, value) {
-            // Remove selected class from siblings
             const parent = element.parentElement;
             parent.querySelectorAll('.choice-card').forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
@@ -353,6 +337,145 @@
 
         function toggleSkill(element) {
             element.classList.toggle('selected');
+        }
+
+        function setupSkillsInput() {
+            const input = document.getElementById('custom-skill-input');
+            if (!input) return;
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const val = input.value.trim();
+                    if (!val) return;
+
+                    // Create skill badge
+                    const container = document.getElementById('ob-skills-container');
+                    const badge = document.createElement('span');
+                    badge.className = 'skill-badge selected';
+                    badge.textContent = val;
+                    badge.onclick = () => toggleSkill(badge);
+                    container.appendChild(badge);
+
+                    input.value = '';
+                }
+            });
+        }
+
+        function setupFileHandlers() {
+            const resumeInput = document.getElementById('ob-resume-input');
+            if (resumeInput) {
+                resumeInput.addEventListener('change', (e) => uploadFile(e.target.files[0], 'resume'));
+            }
+
+            const portfolioInput = document.getElementById('ob-portfolio-input');
+            if (portfolioInput) {
+                portfolioInput.addEventListener('change', (e) => uploadFile(e.target.files[0], 'portfolio'));
+            }
+        }
+
+        async function uploadFile(file, type) {
+            if (!file) return;
+
+            // File extensions checks
+            const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+            const allowed = type === 'resume' ? ['.pdf', '.docx'] : ['.pdf', '.pptx'];
+            
+            if (!allowed.includes(ext)) {
+                showToast(`Unsupported file. Only ${allowed.join(' or ')} formats allowed.`, 'error');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('File too large. Max size is 5MB.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append(type, file);
+
+            const progressContainer = document.getElementById(`${type}-progress-container`);
+            const progressBar = document.getElementById(`${type}-progress-bar`);
+            const titleEl = document.getElementById(`${type}-title`);
+            const infoEl = document.getElementById(`${type}-info`);
+            const iconEl = document.getElementById(`${type}-icon`);
+
+            if (progressContainer) progressContainer.style.display = 'block';
+            if (progressBar) progressBar.style.width = '0%';
+
+            try {
+                let res;
+                if (type === 'resume') {
+                    res = await API.uploadResume(formData, (p) => {
+                        if (progressBar) progressBar.style.width = `${p}%`;
+                    });
+                    if (res.success) {
+                        resumeUploaded = true;
+                        resumeFilename = res.resumeFilename;
+                        if (titleEl) titleEl.textContent = `Resume: ${res.resumeFilename}`;
+                        if (infoEl) infoEl.textContent = 'Uploaded & Parsed successfully!';
+                        if (iconEl) {
+                            iconEl.textContent = 'check_circle';
+                            iconEl.style.color = 'var(--success)';
+                        }
+                        
+                        // Hydrate form with AI parsed data
+                        if (res.parsedData) {
+                            if (res.parsedData.role) {
+                                document.getElementById('ob-role').value = res.parsedData.role;
+                                const roleVal = document.getElementById('ob-role-value');
+                                if (roleVal) roleVal.value = res.parsedData.role;
+                            }
+                            if (res.parsedData.industry) {
+                                document.getElementById('ob-industry').value = res.parsedData.industry;
+                                const indVal = document.getElementById('ob-industry-value');
+                                if (indVal) indVal.value = res.parsedData.industry;
+                            }
+                            if (res.parsedData.experience_level) {
+                                document.getElementById('ob-exp').value = res.parsedData.experience_level;
+                            }
+                            if (res.parsedData.skills && Array.isArray(res.parsedData.skills)) {
+                                const container = document.getElementById('ob-skills-container');
+                                res.parsedData.skills.forEach(skill => {
+                                    const badge = document.createElement('span');
+                                    badge.className = 'skill-badge selected';
+                                    badge.textContent = skill;
+                                    badge.onclick = () => toggleSkill(badge);
+                                    container.appendChild(badge);
+                                });
+                            }
+                        }
+                        showToast('Resume uploaded and parsed via AI!', 'success');
+                    }
+                } else {
+                    res = await API.uploadPortfolio(formData, (p) => {
+                        if (progressBar) progressBar.style.width = `${p}%`;
+                    });
+                    if (res.success) {
+                        portfolioUploaded = true;
+                        if (titleEl) titleEl.textContent = `Portfolio: ${res.portfolioFilename}`;
+                        if (infoEl) infoEl.textContent = 'Uploaded successfully!';
+                        if (iconEl) {
+                            iconEl.textContent = 'check_circle';
+                            iconEl.style.color = 'var(--success)';
+                        }
+                        showToast('Portfolio uploaded successfully!', 'success');
+                    }
+                }
+            } catch (err) {
+                showToast(err.message || 'Upload failed', 'error');
+            } finally {
+                setTimeout(() => {
+                    if (progressContainer) progressContainer.style.display = 'none';
+                }, 1000);
+            }
+        }
+
+        function validateResumeAndNext() {
+            if (!resumeUploaded) {
+                showToast('❌ Please upload your resume to proceed.', 'error');
+                return;
+            }
+            nextStep(8);
         }
 
         function nextStep(step) {
@@ -367,36 +490,46 @@
             document.getElementById('onboarding-progress').style.width = (step / 9 * 100) + '%';
         }
 
-        function finishOnboarding() {
+        async function finishOnboarding() {
             const btn = document.getElementById('finish-btn');
             btn.innerHTML = `<span class="material-symbols-outlined" style="animation:spin 0.8s linear infinite;">refresh</span> Saving...`;
-            
-            // Gather data (mock save)
-            const profile = StorageManager.get('gigflow_profile') || {};
-            profile.role = document.getElementById('ob-role').value;
-            profile.experience = document.getElementById('ob-exp').value;
-            profile.industry = document.getElementById('ob-industry').value;
-            profile.workType = document.getElementById('ob-worktype').value;
-            profile.salary = document.getElementById('ob-salary').value;
-            
+            btn.disabled = true;
+
+            const role = document.getElementById('ob-role-value')?.value || document.getElementById('ob-role').value;
+            const experience = document.getElementById('ob-exp').value || '0-2';
+            const industry = document.getElementById('ob-industry-value')?.value || document.getElementById('ob-industry').value || 'Software Development';
+            const workType = document.getElementById('ob-worktype').value || 'Remote';
+            const salary = document.getElementById('ob-salary').value;
+            const portfolioLink = document.getElementById('ob-portfolio').value;
+
             // Collect selected skills
             const skills = [];
             document.querySelectorAll('.skill-badge.selected').forEach(el => skills.push(el.innerText));
-            profile.skills = skills;
-            
-            StorageManager.set('gigflow_profile', profile);
 
-            // Also update session industry for the Learning Hub
-            const session = StorageManager.get(STORAGE_KEYS.USER_SESSION);
-            if (session) {
-                session.industry = profile.industry;
-                StorageManager.set(STORAGE_KEYS.USER_SESSION, session);
+            try {
+                // Submit details to database
+                await API.updateProfile({
+                    industry: industry,
+                    skills: skills,
+                    experience_level: `${experience} years`,
+                    role: role || 'General',
+                    portfolio_url: portfolioLink || '',
+                    availability_status: 'Available',
+                    is_complete: true
+                });
+
+                // Explicitly fetch the updated session so it's fresh in memory before redirect
+                await API.getSession();
+
+                showToast("Profile completed successfully! Welcome to GigFlow.", "success");
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 1500);
+            } catch (err) {
+                showToast("Failed to complete onboarding: " + err.message, "error");
+                btn.innerHTML = "Finish Setup";
+                btn.disabled = false;
             }
-
-            setTimeout(() => {
-                showToast("Profile set up successfully!", "success");
-                window.location.href = "dashboard.html";
-            }, 1000);
         }
 
         /* Spin keyframe */

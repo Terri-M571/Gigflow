@@ -3,6 +3,31 @@ const router = express.Router();
 const supabase = require('../config/supabase');
 const pool = require('../config/db');
 
+// Helper to extract session token from Authorization header or cookie
+const getTokenFromRequest = (req) => {
+    let token = null;
+    const authHeader = req.header('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    }
+    if (!token && req.cookies) {
+        token = req.cookies.sb_access_token;
+    }
+    return token;
+};
+
+// Public route to check configured OAuth providers
+router.get('/config', (req, res) => {
+    res.json({
+        success: true,
+        oauth: {
+            google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_ID.trim() !== ''),
+            linkedin: !!(process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_ID.trim() !== ''),
+            microsoft: !!(process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_ID.trim() !== '')
+        }
+    });
+});
+
 // ==========================================
 // REGISTER
 // ==========================================
@@ -53,6 +78,7 @@ router.post('/register', async (req, res) => {
             });
             return res.status(201).json({
                 success: true,
+                token: data.session.access_token,
                 user: { id: user.id, email: user.email, full_name: fullName, industry },
                 message: 'Registration successful!'
             });
@@ -106,6 +132,7 @@ router.post('/login', async (req, res) => {
 
         res.json({
             success: true,
+            token: session.access_token,
             user: {
                 id: user.id,
                 email: user.email,
@@ -125,7 +152,7 @@ router.post('/login', async (req, res) => {
 // ==========================================
 router.post('/logout', async (req, res) => {
     try {
-        const token = req.cookies.sb_access_token;
+        const token = getTokenFromRequest(req);
         if (token) {
             // Sign out of Supabase Auth
             await supabase.auth.signOut(token).catch(() => {});
@@ -141,7 +168,7 @@ router.post('/logout', async (req, res) => {
 // SESSION CHECK & ME
 // ==========================================
 router.get('/session', async (req, res) => {
-    const token = req.cookies.sb_access_token;
+    const token = getTokenFromRequest(req);
     if (!token) {
         return res.status(401).json({ success: false, message: 'No active session' });
     }
@@ -173,7 +200,7 @@ router.get('/session', async (req, res) => {
 });
 
 router.get('/me', async (req, res) => {
-    const token = req.cookies.sb_access_token;
+    const token = getTokenFromRequest(req);
     if (!token) {
         return res.status(401).json({ success: false, message: 'No active session' });
     }

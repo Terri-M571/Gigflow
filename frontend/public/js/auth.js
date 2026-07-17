@@ -44,7 +44,60 @@ document.addEventListener('DOMContentLoaded', () => {
     if (forgotForm) {
         forgotForm.addEventListener('submit', handleForgotPassword);
     }
+
+    // 4. Setup Dynamic OAuth Buttons Visibility
+    setupOAuthButtons();
 });
+
+async function setupOAuthButtons() {
+    try {
+        const config = await API.getAuthConfig();
+        if (config && config.oauth) {
+            const googleBtn = document.querySelector('button[onclick*="google"]');
+            const linkedinBtn = document.querySelector('button[onclick*="linkedin"]');
+            const microsoftBtn = document.querySelector('button[onclick*="microsoft"]');
+
+            if (googleBtn) {
+                if (config.oauth.google) {
+                    googleBtn.style.display = 'flex';
+                } else {
+                    googleBtn.style.display = 'none';
+                }
+            }
+
+            if (linkedinBtn) {
+                if (config.oauth.linkedin) {
+                    linkedinBtn.style.display = 'flex';
+                    linkedinBtn.disabled = false;
+                } else {
+                    linkedinBtn.disabled = true;
+                    linkedinBtn.style.opacity = '0.5';
+                    linkedinBtn.style.cursor = 'not-allowed';
+                    linkedinBtn.title = 'LinkedIn Login not configured';
+                    linkedinBtn.style.display = 'none'; // Also hiding to keep UI clean
+                }
+            }
+
+            if (microsoftBtn) {
+                if (config.oauth.microsoft) {
+                    microsoftBtn.style.display = 'flex';
+                } else {
+                    microsoftBtn.style.display = 'none';
+                }
+            }
+
+            // If all social logins are hidden, hide the OR divider
+            if (!config.oauth.google && !config.oauth.linkedin && !config.oauth.microsoft) {
+                const divider = document.querySelector('.auth-card > div[style*="margin: 24px"]');
+                if (divider) divider.style.display = 'none';
+                const signupDivider = document.querySelector('.card > div[style*="margin: 24px"]');
+                if (signupDivider) signupDivider.style.display = 'none';
+            }
+        }
+    } catch (e) {
+        console.warn("Failed to check OAuth configs:", e);
+    }
+}
 
 function evaluatePassword(password) {
     let score = 0;
@@ -80,10 +133,6 @@ function updateStrengthBar(score) {
    GREETING UTILITY — Shared across all pages
    ========================================================================== */
 
-/**
- * Returns a time-based greeting string: "Good Morning", "Good Afternoon",
- * "Good Evening", or "Good Night" based on local hour.
- */
 function getTimeGreeting() {
     const hour = new Date().getHours();
     if (hour >= 5  && hour < 12) return 'Good Morning';
@@ -92,9 +141,6 @@ function getTimeGreeting() {
     return 'Good Night';
 }
 
-/**
- * Returns the greeting emoji matching the time of day.
- */
 function getGreetingEmoji() {
     const hour = new Date().getHours();
     if (hour >= 5  && hour < 12) return '☀️';
@@ -103,27 +149,15 @@ function getGreetingEmoji() {
     return '🌙';
 }
 
-/**
- * Extracts the first name from a full name string.
- * "Sarah Wanjiku" → "Sarah"
- */
 function getFirstName(fullName) {
     if (!fullName) return 'there';
     return fullName.trim().split(' ')[0];
 }
 
-/**
- * Builds and returns the full personalized greeting string.
- * e.g. "Good Morning, Sarah! ☀️"
- */
 function buildGreeting(fullName) {
     return `${getTimeGreeting()}, ${getFirstName(fullName)}! ${getGreetingEmoji()}`;
 }
 
-/**
- * Injects the personalized greeting into any element matching `selector`.
- * Falls back gracefully if no session or element found.
- */
 function injectGreeting(selector) {
     const el = document.querySelector(selector);
     if (!el) return;
@@ -139,6 +173,15 @@ window.getTimeGreeting = getTimeGreeting;
 window.getGreetingEmoji = getGreetingEmoji;
 window.injectGreeting = injectGreeting;
 
+// Validate email helper
+function validateEmailFormat(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+/* ==========================================================================
+   LOGIN HANDLER
+   ========================================================================== */
 async function handleLogin(e) {
     e.preventDefault();
 
@@ -152,11 +195,18 @@ async function handleLogin(e) {
     const password = passwordEl.value;
 
     if (!email || !password) {
-        showToast('Please fill in all fields', 'error');
+        showToast('❌ Please fill in all fields', 'error');
         return;
     }
 
     const originalText = btn.innerHTML;
+
+    // Validate email format
+    if (!validateEmailFormat(email)) {
+        showToast('❌ Invalid email format', 'error');
+        return;
+    }
+
     btn.innerHTML = `<span class="material-symbols-outlined" style="animation:spin 0.8s linear infinite;">refresh</span> Logging in...`;
     btn.disabled = true;
 
@@ -165,14 +215,16 @@ async function handleLogin(e) {
         window.currentUser = response.user;
 
         const greeting = buildGreeting(response.user.full_name);
-        showToast(`${greeting} Welcome back! 🎉`, 'success');
+        showToast(`✔ Login successful. ${greeting}`, 'success');
 
         setTimeout(() => {
             window.location.href = 'dashboard.html';
         }, 1300);
 
     } catch (err) {
-        showToast(err.message || 'Invalid email or password combination', 'error');
+        // Highlight errors clearly (Incorrect password, Email not found, Server unavailable)
+        const errMsg = err.message.startsWith('❌') ? err.message : `❌ ${err.message}`;
+        showToast(errMsg, 'error');
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
@@ -181,12 +233,11 @@ async function handleLogin(e) {
 /* ==========================================================================
    SIGNUP HANDLER
    ========================================================================== */
-
 async function handleSignup(e) {
     e.preventDefault();
 
     const name     = document.getElementById('signup-name').value.trim();
-    const industry = document.getElementById('signup-industry').value;
+    const industry = document.getElementById('signup-industry-value')?.value || document.getElementById('signup-industry').value;
     const email    = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value;
     const confirmPassword = document.getElementById('signup-confirm-password')?.value;
@@ -195,17 +246,23 @@ async function handleSignup(e) {
     const btn = e.target.querySelector('button[type="submit"]');
 
     if (!name || !industry || !email || !password || !confirmPassword) {
-        showToast('Please fill in all required fields', 'error');
+        showToast('❌ Please fill in all required fields', 'error');
+        return;
+    }
+
+    // Validate email format
+    if (!validateEmailFormat(email)) {
+        showToast('❌ Invalid email format', 'error');
         return;
     }
 
     if (password !== confirmPassword) {
-        showToast('Passwords do not match', 'error');
+        showToast('❌ Passwords do not match', 'error');
         return;
     }
 
     if (document.getElementById('signup-agree') && !agree) {
-        showToast('You must agree to the Terms of Service', 'error');
+        showToast('❌ You must agree to the Terms of Service', 'error');
         return;
     }
 
@@ -218,18 +275,19 @@ async function handleSignup(e) {
         
         if (response.user) {
             window.currentUser = response.user;
-            showToast('Account created securely! Redirecting...', 'success');
+            showToast('✔ Account created successfully! Redirecting...', 'success');
             setTimeout(() => {
                 window.location.href = 'onboarding.html';
             }, 1500);
         } else {
-            showToast(response.message || 'Verification link sent to email.', 'success');
+            showToast(response.message || '✔ Verification link sent to email.', 'success');
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
 
     } catch (err) {
-        showToast(err.message || 'Error creating account', 'error');
+        const errMsg = err.message.startsWith('❌') ? err.message : `❌ ${err.message}`;
+        showToast(errMsg, 'error');
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
@@ -238,14 +296,18 @@ async function handleSignup(e) {
 /* ==========================================================================
    FORGOT PASSWORD & RESET HANDLERS
    ========================================================================== */
-
 async function handleForgotPassword(e) {
     e.preventDefault();
     const email = document.getElementById('forgot-email').value.trim();
     const btn = document.getElementById('forgot-btn');
     
     if (!email) {
-        showToast('Please enter your email address', 'error');
+        showToast('❌ Please enter your email address', 'error');
+        return;
+    }
+
+    if (!validateEmailFormat(email)) {
+        showToast('❌ Invalid email format', 'error');
         return;
     }
 
@@ -254,33 +316,27 @@ async function handleForgotPassword(e) {
     btn.disabled = true;
 
     try {
-        const response = await API.requestPasswordReset(email);
-        
-        // Since we don't have a real email server, we will alert the simulated token directly
-        // In a real app, this would just say "Check your email!"
-        showToast(`Reset link simulated! Redirecting...`, 'success');
-        
-        // Pass the token to the reset page for this demo
-        setTimeout(() => {
-            window.location.href = `reset-password.html${response.resetToken ? '?token=' + response.resetToken : ''}`;
-        }, 2000);
-
+        await API.requestPasswordReset(email);
+        showToast(`✔ Password reset link sent to your email.`, 'success');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     } catch (err) {
-        showToast('Error requesting password reset', 'error');
+        const errMsg = err.message.startsWith('❌') ? err.message : `❌ ${err.message}`;
+        showToast(errMsg, 'error');
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
 }
 
 async function handleResetPassword(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     
     // Extract token from URL
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     
     if (!token) {
-        showToast('Invalid or missing reset token', 'error');
+        showToast('❌ Invalid or missing reset token', 'error');
         return;
     }
 
@@ -289,12 +345,12 @@ async function handleResetPassword(e) {
     const btn = document.getElementById('reset-btn');
 
     if (!password || !confirmPassword) {
-        showToast('Please fill in all fields', 'error');
+        showToast('❌ Please fill in all fields', 'error');
         return;
     }
 
     if (password !== confirmPassword) {
-        showToast('Passwords do not match', 'error');
+        showToast('❌ Passwords do not match', 'error');
         return;
     }
 
@@ -304,26 +360,43 @@ async function handleResetPassword(e) {
 
     try {
         await API.resetPassword(token, password);
-        showToast('Password reset successfully! Redirecting to login...', 'success');
+        showToast('✔ Password reset successfully! Redirecting to login...', 'success');
         setTimeout(() => {
             window.location.href = 'login.html';
         }, 1500);
     } catch (err) {
-        showToast(err.message || 'Failed to reset password', 'error');
+        const errMsg = err.message.startsWith('❌') ? err.message : `❌ ${err.message}`;
+        showToast(errMsg, 'error');
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
 }
 
-/* ==========================================================================
-   SESSION GUARD
-   ========================================================================== */
-
 function checkSession() {
-    const publicPages = ['login.html', 'signup.html', 'index.html'];
+    const publicPages = ['login.html', 'signup.html', 'index.html', 'pricing.html'];
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    
+    // Auth Check
     if (!window.currentUser && !publicPages.some(p => currentPage.includes(p))) {
         window.location.href = 'login.html';
+        return;
+    }
+
+    // Profile Completion Check
+    if (window.currentUser) {
+        const isComplete = window.currentUser.is_complete === true || String(window.currentUser.is_complete) === '1' || String(window.currentUser.is_complete).toLowerCase() === 'true';
+        
+        if (!isComplete && currentPage !== 'onboarding.html') {
+            window.location.href = 'onboarding.html';
+            return;
+        }
+        
+        if (isComplete && (currentPage === 'login.html' || currentPage === 'signup.html' || currentPage === 'onboarding.html')) {
+            window.location.href = 'dashboard.html';
+            return;
+        }
     }
 }
+
 window.checkSession = checkSession;
+window.handleResetPassword = handleResetPassword;
