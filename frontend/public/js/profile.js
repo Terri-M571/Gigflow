@@ -46,7 +46,7 @@ async function loadProfileData() {
         setValue('profile-bio', profile.experience_level || ''); // Summary/bio
         setValue('profile-experience', profile.experience_level || '');
         setValue('profile-skills', profile.skills ? profile.skills.join(', ') : '');
-        setValue('profile-links', profile.linkedin_url || profile.portfolio_url || '');
+        setValue('profile-links', profile.linkedin_url || '');
         setValue('profile-education', profile.highest_education || '');
         setValue('profile-languages', profile.languages || '');
         setValue('profile-availability', profile.availability_status || 'Available');
@@ -98,7 +98,7 @@ async function saveProfileData(e) {
             full_name: name,
             skills,
             experience_level: experience,
-            portfolio_url: links,
+            linkedin_url: links,
             highest_education: education,
             languages: languages,
             availability_status: availability,
@@ -252,15 +252,23 @@ async function deleteResume() {
 function renderResumeUI(filename, url) {
     const filenameEl = document.getElementById('resume-filename');
     const deleteBtn = document.getElementById('delete-resume-btn');
+    const uploadBtn = document.getElementById('upload-resume-btn');
     
     if (!filenameEl) return;
 
     if (filename && url) {
-        filenameEl.innerHTML = `<a href="${url}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;">${filename}</a>`;
+        filenameEl.innerHTML = `
+            <a href="${url}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;">${filename}</a>
+            <div style="margin-top: 8px;">
+                <span class="badge badge-primary" style="font-size: 0.7rem; background-color: rgba(34, 197, 94, 0.1); color: #16a34a; border: 1px solid rgba(34, 197, 94, 0.2);"><span class="material-symbols-outlined" style="font-size: 12px; margin-right: 4px;">check_circle</span>Parsed & Stored</span>
+            </div>
+        `;
         if (deleteBtn) deleteBtn.style.display = 'inline-block';
+        if (uploadBtn) uploadBtn.textContent = 'Update CV';
     } else {
         filenameEl.textContent = 'No resume attached yet';
         if (deleteBtn) deleteBtn.style.display = 'none';
+        if (uploadBtn) uploadBtn.textContent = 'Upload Resume';
     }
 }
 

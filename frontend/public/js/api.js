@@ -2,9 +2,10 @@
    GIGFLOW - REST API CLIENT (api.js)
    ========================================================================== */
 
-const BASE_URL = window.location.origin.includes(':5000') 
-    ? '/api' 
-    : 'http://localhost:5000/api';
+let BASE_URL = '/api';
+if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '5000') {
+    BASE_URL = 'http://localhost:5000/api';
+}
 
 const API = {
     // Standardized Fetch Helper with Credentials (Cookies)
@@ -253,57 +254,6 @@ const API = {
 
     deleteResume: async () => {
         return await API._fetch('/profile/resume', 'DELETE');
-    },
-
-    uploadPortfolio: async (formData, onProgress) => {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', `${BASE_URL}/profile/portfolio`);
-            xhr.withCredentials = true;
-            
-            const token = localStorage.getItem('gigflow_token');
-            if (token) {
-                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-            }
-            
-            xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable && typeof onProgress === 'function') {
-                    const percent = Math.round((e.loaded / e.total) * 100);
-                    onProgress(percent);
-                }
-            };
-            
-            xhr.onload = () => {
-                try {
-                    const res = JSON.parse(xhr.responseText);
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve(res);
-                    } else if (xhr.status === 401) {
-                        localStorage.removeItem('gigflow_token');
-                        localStorage.removeItem('gigflow_user');
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 1800);
-                        reject(new Error('Please log in to upload your portfolio.'));
-                    } else {
-                        let msg = res.message || 'Upload failed';
-                        if (msg.includes('No token') || msg.includes('authorization denied') || msg.includes('Unauthorized') || msg.includes('invalid') || msg.includes('expired')) {
-                            msg = 'Please log in to upload your portfolio.';
-                        }
-                        reject(new Error(msg));
-                    }
-                } catch (err) {
-                    reject(new Error('Upload failed. Please try again.'));
-                }
-            };
-            
-            xhr.onerror = () => reject(new Error('Upload failed. Please try again.'));
-            xhr.send(formData);
-        });
-    },
-
-    deletePortfolio: async () => {
-        return await API._fetch('/profile/portfolio', 'DELETE');
     },
 
     // ==========================================

@@ -242,6 +242,46 @@ function downloadCLPDF() {
     }
 }
 
+async function downloadCLDOCX() {
+    const txt = document.getElementById('cl-output-text').value;
+    if (txt.includes('will render here') || !txt) {
+        showToast('❌ Please generate a letter first', 'error');
+        return;
+    }
+
+    try {
+        showToast('Generating DOCX...', 'info');
+        const response = await fetch(`${BASE_URL}/ai/cover-letter/export-docx`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('gigflow_token')}`
+            },
+            body: JSON.stringify({ content: txt })
+        });
+        
+        if (!response.ok) throw new Error('Failed to generate DOCX');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        const company = document.getElementById('cl-company').value.trim() || 'Company';
+        const role = document.getElementById('cl-role').value.trim() || 'Role';
+        a.download = `Cover_Letter_${role.replace(/\s+/g, '_')}_${company.replace(/\s+/g, '_')}.docx`;
+        
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        showToast('✔ DOCX downloaded successfully!', 'success');
+    } catch (e) {
+        console.error(e);
+        showToast('Failed to download DOCX', 'error');
+    }
+}
+
 function setupDraftEditBinds() {
     // Add dynamic change listener to textarea to auto-detect edits
     const textarea = document.getElementById('cl-output-text');
@@ -264,6 +304,7 @@ function setupDraftEditBinds() {
 window.generateCoverLetter = generateCoverLetter;
 window.copyCLText = copyCLText;
 window.downloadCLPDF = downloadCLPDF;
+window.downloadCLDOCX = downloadCLDOCX;
 window.loadLetter = loadLetter;
 window.deleteLetter = deleteLetter;
 window.saveLetterDraft = saveLetterDraft;

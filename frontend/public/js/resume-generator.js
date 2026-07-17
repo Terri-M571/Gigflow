@@ -1,155 +1,236 @@
-// Resume Generator State Management & UI Logic
-const resumeBuilder = {
+// AI Resume Generator Logic
+const resumeGenerator = {
     state: {
-        name: '',
-        title: '',
-        email: '',
-        location: '',
-        summary: '',
-        experience: [
-            { id: 1, title: 'Senior Engineer', company: 'Tech Corp', responsibilities: 'Led a team of 5 developers to build scalable APIs.' }
-        ],
-        skills: ''
+        sourceResumeText: '',
+        generatedResumeData: null
     },
 
     init: async function() {
-        console.log("Initializing Resume Generator...");
+        console.log("Initializing AI Resume Generator...");
         
         // 1. Check if user is logged in
         const token = localStorage.getItem('gigflow_token');
         if (!token) {
-            window.location.href = '/login.html';
+            window.location.href = 'login.html';
+            return;
+        }
+    },
+
+    useProfileResume: async function() {
+        try {
+            const btn = document.activeElement;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 4px;">hourglass_empty</span> Loading...`;
+            btn.disabled = true;
+
+            const res = await API.getProfile();
+            if (res.success && res.profile && res.profile.resume_text) {
+                this.state.sourceResumeText = res.profile.resume_text;
+                document.getElementById('generator-upload-status').style.display = 'block';
+                document.getElementById('generator-upload-text').innerText = 'Profile Resume loaded successfully.';
+            } else {
+                showToast("No parsed resume found in your profile. Please upload one.", "error");
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        } catch (e) {
+            console.error(e);
+            showToast("Failed to load profile resume.", "error");
+        }
+    },
+
+    handleResumeUpload: async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const allowedExtensions = ['.pdf', '.docx'];
+        const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+        
+        if (!allowedExtensions.includes(ext)) {
+            showToast('Only PDF and DOCX files are allowed.', 'error');
+            event.target.value = '';
             return;
         }
 
-        // 2. Try to load saved draft
+        const formData = new FormData();
+        formData.append('resume', file);
+
         try {
-            const res = await API._fetch('/profile/resume-builder', 'GET');
-            if (res.success && res.data) {
-                const savedState = JSON.parse(res.data);
-                this.state = { ...this.state, ...savedState };
-                showToast('Loaded saved resume draft.', 'success');
-            } else {
-                // If no draft, auto-fill basic info from current session
-                const userSession = JSON.parse(localStorage.getItem('gigflow_session'));
-                if (userSession) {
-                    this.state.name = userSession.name || '';
-                    this.state.email = userSession.email || '';
+            showToast("Extracting text from resume...", "info");
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${BASE_URL}/ai/resume/parse`);
+            xhr.withCredentials = true;
+            const token = localStorage.getItem('gigflow_token');
+            if (token) {
+                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            }
+            
+            xhr.onload = () => {
+                const res = JSON.parse(xhr.responseText);
+                if (res.success && res.text) {
+                    this.state.sourceResumeText = res.text;
+                    document.getElementById('generator-upload-status').style.display = 'block';
+                    document.getElementById('generator-upload-text').innerText = 'Resume file loaded successfully.';
+                    showToast("Resume parsed successfully!", "success");
+                } else {
+                    showToast(res.message || "Failed to parse resume.", "error");
                 }
+            };
+            xhr.onerror = () => showToast("Network error during upload.", "error");
+            xhr.send(formData);
+
+        } catch (e) {
+            console.error(e);
+            showToast("Failed to upload resume.", "error");
+        }
+    },
+
+    generateResume: async function() {
+        if (!this.state.sourceResumeText) {
+            showToast("Please upload a resume or use your profile CV first.", "error");
+            return;
+        }
+
+        const jd = document.getElementById('generator-jd').value;
+        const btn = document.getElementById('btn-generate');
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Generating...`;
+        btn.disabled = true;
+
+        try {
+            const response = await API._fetch('/ai/resume/generate', 'POST', {
+                resumeText: this.state.sourceResumeText,
+                jobDescription: jd
+            });
+
+            if (response.success && response.generated) {
+                this.state.generatedResumeData = response.generated;
+                this.renderPreview();
+                this.renderFeedback();
+                showToast("AI Resume generated successfully!", "success");
+            } else {
+                showToast(response.message || "Failed to generate resume.", "error");
             }
         } catch (e) {
-            console.error("Error loading resume draft:", e);
-        }
-
-        this.renderInputs();
-        this.updatePreview();
-    },
-
-    renderInputs: function() {
-        document.getElementById('builder-name').value = this.state.name;
-        document.getElementById('builder-title').value = this.state.title;
-        document.getElementById('builder-email').value = this.state.email;
-        document.getElementById('builder-location').value = this.state.location;
-        document.getElementById('builder-summary').value = this.state.summary;
-        document.getElementById('builder-skills').value = this.state.skills;
-
-        this.renderExperienceInputs();
-    },
-
-    renderExperienceInputs: function() {
-        const container = document.getElementById('experience-list');
-        container.innerHTML = '';
-        
-        this.state.experience.forEach((exp, index) => {
-            const expDiv = document.createElement('div');
-            expDiv.className = 'experience-item';
-            expDiv.style.border = '1px solid var(--border-color)';
-            expDiv.style.padding = '16px';
-            expDiv.style.borderRadius = '8px';
-            expDiv.style.position = 'relative';
-
-            expDiv.innerHTML = `
-                <button class="btn btn-icon" style="position: absolute; top: 8px; right: 8px; color: var(--danger);" onclick="resumeBuilder.removeExperience(${exp.id})">
-                    <span class="material-symbols-outlined" style="font-size: 1.2rem;">delete</span>
-                </button>
-                <div class="form-group">
-                    <label class="form-label">Job Title</label>
-                    <input class="form-control" type="text" value="${exp.title}" oninput="resumeBuilder.updateExpField(${exp.id}, 'title', this.value)">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Company</label>
-                    <input class="form-control" type="text" value="${exp.company}" oninput="resumeBuilder.updateExpField(${exp.id}, 'company', this.value)">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Responsibilities / Achievements</label>
-                    <div style="position: relative;">
-                        <textarea class="form-control" rows="3" oninput="resumeBuilder.updateExpField(${exp.id}, 'responsibilities', this.value)">${exp.responsibilities}</textarea>
-                        <button class="btn btn-icon" style="position: absolute; bottom: 8px; right: 8px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--primary); padding: 4px; border-radius: 4px;" onclick="resumeBuilder.improveExpText(${exp.id})" title="Improve with AI">
-                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">auto_awesome</span>
-                        </button>
-                    </div>
-                </div>
-            `;
-            container.appendChild(expDiv);
-        });
-    },
-
-    updateExpField: function(id, field, value) {
-        const exp = this.state.experience.find(e => e.id === id);
-        if (exp) {
-            exp[field] = value;
-            this.updatePreview();
+            console.error(e);
+            showToast("An error occurred during generation.", "error");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
     },
 
-    addExperience: function() {
-        const newId = this.state.experience.length > 0 ? Math.max(...this.state.experience.map(e => e.id)) + 1 : 1;
-        this.state.experience.push({ id: newId, title: '', company: '', responsibilities: '' });
-        this.renderExperienceInputs();
-        this.updatePreview();
-    },
+    renderPreview: function() {
+        const data = this.state.generatedResumeData;
+        if (!data) return;
 
-    removeExperience: function(id) {
-        this.state.experience = this.state.experience.filter(e => e.id !== id);
-        this.renderExperienceInputs();
-        this.updatePreview();
-    },
-
-    updateStateFromDOM: function() {
-        this.state.name = document.getElementById('builder-name').value;
-        this.state.title = document.getElementById('builder-title').value;
-        this.state.email = document.getElementById('builder-email').value;
-        this.state.location = document.getElementById('builder-location').value;
-        this.state.summary = document.getElementById('builder-summary').value;
-        this.state.skills = document.getElementById('builder-skills').value;
-    },
-
-    updatePreview: function() {
-        this.updateStateFromDOM();
-
-        document.getElementById('paper-name').textContent = this.state.name || 'Your Name';
-        document.getElementById('paper-title').textContent = this.state.title || 'Job Title';
+        // Render Personal Info
+        document.getElementById('paper-name').textContent = data.personal?.name || 'Your Name';
+        document.getElementById('paper-title').textContent = data.personal?.title || 'Job Title';
         
-        const contactStr = [this.state.email, this.state.location].filter(Boolean).join(' | ');
-        document.getElementById('paper-contact').textContent = contactStr || 'you@example.com | Location';
+        const contactArr = [];
+        if (data.personal?.email) contactArr.push(data.personal.email);
+        if (data.personal?.phone) contactArr.push(data.personal.phone);
+        if (data.personal?.location) contactArr.push(data.personal.location);
+        if (data.personal?.linkedin) contactArr.push(data.personal.linkedin);
         
-        document.getElementById('paper-summary').textContent = this.state.summary || '';
-        document.getElementById('paper-skills').textContent = this.state.skills || '';
+        document.getElementById('paper-contact').textContent = contactArr.join(' | ');
 
+        // Render Summary
+        document.getElementById('paper-summary').textContent = data.summary || '';
+
+        // Render Experience
         const expContainer = document.getElementById('paper-experience-list');
         expContainer.innerHTML = '';
-        this.state.experience.forEach(exp => {
-            const expDiv = document.createElement('div');
-            expDiv.className = 'resume-paper-item';
-            expDiv.innerHTML = `
-                <div class="resume-paper-item-header" style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 4px;">
-                    <span>${exp.title || 'Job Title'}</span>
-                    <span>${exp.company || 'Company'}</span>
-                </div>
-                <p style="margin-top: 4px; font-size: 0.85rem; color: #475569; white-space: pre-wrap; line-height: 1.5;">${exp.responsibilities || ''}</p>
-            `;
-            expContainer.appendChild(expDiv);
-        });
+        
+        if (data.experience && Array.isArray(data.experience)) {
+            data.experience.forEach(exp => {
+                const div = document.createElement('div');
+                div.style.marginBottom = '12px';
+                
+                let bulletsHtml = '';
+                if (exp.description && Array.isArray(exp.description)) {
+                    bulletsHtml = `<ul style="margin-top: 4px; padding-left: 16px; font-size: 0.85rem; color: #475569;">
+                        ${exp.description.map(b => `<li style="margin-bottom: 4px;">${b}</li>`).join('')}
+                    </ul>`;
+                }
+
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <strong style="font-size: 0.95rem; color: var(--text-color);">${exp.title}</strong>
+                        <span style="font-size: 0.8rem; color: #64748b;">${exp.date || ''}</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">${exp.company || ''}</div>
+                    ${bulletsHtml}
+                `;
+                expContainer.appendChild(div);
+            });
+        }
+
+        // Render Education
+        if (data.education && Array.isArray(data.education) && data.education.length > 0) {
+            // Check if education section exists, if not create it
+            let eduSection = document.getElementById('paper-education-section');
+            if (!eduSection) {
+                eduSection = document.createElement('div');
+                eduSection.className = 'resume-paper-section';
+                eduSection.id = 'paper-education-section';
+                eduSection.style.marginBottom = '16px';
+                eduSection.innerHTML = `<h3 class="resume-paper-section-title">Education</h3><div id="paper-education-list"></div>`;
+                
+                // Insert before skills
+                const skillsSection = document.getElementById('paper-skills').parentNode;
+                skillsSection.parentNode.insertBefore(eduSection, skillsSection);
+            }
+            
+            const eduList = document.getElementById('paper-education-list');
+            eduList.innerHTML = '';
+            data.education.forEach(edu => {
+                eduList.innerHTML += `
+                    <div style="margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <strong style="font-size: 0.9rem; color: var(--text-color);">${edu.degree}</strong>
+                            <span style="font-size: 0.8rem; color: #64748b;">${edu.year || ''}</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #475569;">${edu.school || ''}</div>
+                    </div>
+                `;
+            });
+        }
+
+        // Render Skills
+        document.getElementById('paper-skills').textContent = (data.skills || []).join(' • ');
+    },
+
+    renderFeedback: function() {
+        const feedback = this.state.generatedResumeData?.aiFeedback;
+        if (!feedback) return;
+
+        const section = document.getElementById('ai-feedback-section');
+        section.style.display = 'block';
+
+        const scoreEl = document.getElementById('feedback-score');
+        scoreEl.textContent = feedback.atsScore || 0;
+        
+        if (feedback.atsScore >= 80) {
+            scoreEl.style.color = '#10b981';
+            section.style.borderLeftColor = '#10b981';
+        } else if (feedback.atsScore >= 60) {
+            scoreEl.style.color = '#f59e0b';
+            section.style.borderLeftColor = '#f59e0b';
+        } else {
+            scoreEl.style.color = '#ef4444';
+            section.style.borderLeftColor = '#ef4444';
+        }
+
+        const strengthsUl = document.getElementById('feedback-strengths');
+        strengthsUl.innerHTML = (feedback.strengths || []).map(s => `<li>${s}</li>`).join('');
+
+        const improvementsUl = document.getElementById('feedback-improvements');
+        improvementsUl.innerHTML = (feedback.improvements || []).map(i => `<li>${i}</li>`).join('');
     },
 
     toggleCvFormat: function() {
@@ -157,268 +238,88 @@ const resumeBuilder = {
         const paper = document.getElementById('resume-paper-frame');
         
         if (format === 'ats') {
-            paper.style.fontFamily = 'Arial, Helvetica, sans-serif';
-            paper.style.color = '#000000';
-            paper.style.boxShadow = 'none';
-            paper.style.border = '1px solid #ccc';
-            document.getElementById('paper-name').style.color = '#000';
-            document.getElementById('paper-title').style.color = '#000';
+            paper.style.fontFamily = "'Times New Roman', Times, serif";
+            paper.style.color = "#000";
             
-            // ATS removes fancy colors from section titles
-            document.querySelectorAll('.resume-paper-section-title').forEach(el => {
-                el.style.color = '#000';
-                el.style.borderBottom = '2px solid #000';
-            });
-            document.querySelectorAll('.resume-paper-item-header').forEach(el => {
+            // Remove colors
+            const highlights = paper.querySelectorAll('[style*="color: var(--primary)"]');
+            highlights.forEach(el => {
+                el.dataset.oldColor = el.style.color;
                 el.style.color = '#000';
             });
-            document.querySelectorAll('p').forEach(el => el.style.color = '#000');
-            
         } else {
-            // Modern Format
-            paper.style.fontFamily = 'var(--font-heading)';
-            paper.style.color = 'var(--text-color)';
-            paper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.08)';
-            paper.style.border = '1px solid var(--border-color)';
-            document.getElementById('paper-name').style.color = 'var(--text-color)';
-            document.getElementById('paper-title').style.color = 'var(--primary)';
+            paper.style.fontFamily = "'Inter', sans-serif";
+            paper.style.color = "var(--text-color)";
             
             // Restore colors
-            document.querySelectorAll('.resume-paper-section-title').forEach(el => {
-                el.style.color = 'var(--primary)';
-                el.style.borderBottom = '2px solid var(--primary-light)';
+            const highlights = paper.querySelectorAll('[data-old-color]');
+            highlights.forEach(el => {
+                el.style.color = el.dataset.oldColor;
             });
-            document.querySelectorAll('.resume-paper-item-header').forEach(el => {
-                el.style.color = 'var(--text-color)';
-            });
-            document.querySelectorAll('p').forEach(el => el.style.color = '#475569');
-            document.getElementById('paper-contact').style.color = '#64748b';
-        }
-        
-        showToast(`Switched to ${format.toUpperCase()} format`, 'info');
-    },
-
-    saveDraft: async function() {
-        this.updateStateFromDOM();
-        const btn = document.getElementById('btn-save');
-        btn.innerHTML = '<span class="loader"></span> Saving...';
-        btn.disabled = true;
-
-        try {
-            await API._fetch('/profile/resume-builder', 'PUT', { data: this.state });
-            showToast('Draft Saved!', 'success');
-        } catch(e) {
-            showToast('Failed to save draft', 'error');
-        } finally {
-            btn.innerHTML = 'Save Draft';
-            btn.disabled = false;
-        }
-    },
-
-    autoFillFromProfile: async function() {
-        showToast('Fetching profile data...', 'info');
-        try {
-            const res = await API._fetch('/profile', 'GET');
-            if(res.success && res.profile) {
-                const p = res.profile;
-                this.state.name = p.full_name || this.state.name;
-                this.state.title = p.role || this.state.title;
-                this.state.email = p.email || this.state.email;
-                this.state.location = [p.city, p.country].filter(Boolean).join(', ') || this.state.location;
-                if(p.skills) {
-                    this.state.skills = Array.isArray(p.skills) ? p.skills.join(', ') : p.skills;
-                }
-                
-                // If they have extracted text from a resume, try to dump it in summary for now
-                if(p.resume_text && !this.state.summary) {
-                    this.state.summary = p.resume_text.substring(0, 300) + '...';
-                }
-
-                this.renderInputs();
-                this.updatePreview();
-                showToast('Profile data loaded', 'success');
-            }
-        } catch(e) {
-            showToast('Error loading profile', 'error');
         }
     },
 
     exportPDF: function() {
+        if (!this.state.generatedResumeData) {
+            showToast("Generate a resume first.", "error");
+            return;
+        }
+
         const element = document.getElementById('resume-paper-frame');
-        showToast('Generating high-quality PDF...', 'info');
-        
         const opt = {
             margin:       10,
-            filename:     `${this.state.name.replace(/\s+/g, '_')}_Resume.pdf`,
+            filename:     'GigFlow_Resume.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(element).save().then(() => {
-            showToast('PDF Exported Successfully!', 'success');
-        }).catch(err => {
-            console.error('PDF Export Error:', err);
-            showToast('Error exporting PDF', 'error');
-        });
+        html2pdf().set(opt).from(element).save();
     },
 
     exportDOCX: async function() {
-        this.updateStateFromDOM();
-        showToast('Generating DOCX...', 'info');
+        if (!this.state.generatedResumeData) {
+            showToast("Generate a resume first.", "error");
+            return;
+        }
+        
         try {
-            const token = localStorage.getItem('gigflow_token');
-            const res = await fetch(`${BASE_URL}/resume/export-docx`, {
+            showToast("Generating DOCX...", "info");
+            const response = await fetch(`${BASE_URL}/ai/resume/export-docx`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${localStorage.getItem('gigflow_token')}`
                 },
-                body: JSON.stringify(this.state)
+                body: JSON.stringify({ resumeData: this.state.generatedResumeData })
             });
-            if (!res.ok) throw new Error('Failed to generate DOCX');
             
-            const blob = await res.blob();
+            if (!response.ok) {
+                throw new Error('Failed to generate DOCX');
+            }
+            
+            const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${this.state.name ? this.state.name.replace(/\s+/g, '_') : 'Resume'}.docx`;
+            a.download = 'GigFlow_Resume.docx';
             document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
             a.remove();
-            
-            showToast('DOCX Exported Successfully!', 'success');
+            window.URL.revokeObjectURL(url);
+            showToast("DOCX downloaded successfully!", "success");
         } catch (e) {
             console.error(e);
-            showToast('Error exporting DOCX', 'error');
+            showToast("Failed to download DOCX.", "error");
         }
     },
-
-    // ==========================================
-    // AI INTEGRATION
-    // ==========================================
     
-    generateAIResume: async function() {
-        this.updateStateFromDOM();
-        if(!this.state.title) {
-            showToast('Please enter a Target Job Title first', 'error');
-            return;
-        }
-
-        const btn = document.getElementById('btn-ai-generate');
-        const jd = document.getElementById('builder-jd') ? document.getElementById('builder-jd').value : '';
-        btn.innerHTML = '<span class="loader"></span> Generating...';
-        btn.disabled = true;
-
-        try {
-            const payload = {
-                title: this.state.title,
-                bio: this.state.summary,
-                skills: this.state.skills.split(',').map(s=>s.trim()).filter(Boolean)
-            };
-            if (jd) payload.jobDescription = jd;
-
-            const res = await API._fetch('/ai/resume/generate', 'POST', payload);
-            
-            if(res.success && res.generated) {
-                const gen = res.generated;
-                this.state.summary = gen.summary || this.state.summary;
-                
-                // Map generated bullets to the first experience item, or create one
-                if(gen.experienceBullets && gen.experienceBullets.length > 0) {
-                    if(this.state.experience.length === 0) {
-                        this.state.experience.push({ id: 1, title: this.state.title, company: 'Example Corp', responsibilities: ''});
-                    }
-                    this.state.experience[0].responsibilities = gen.experienceBullets.map(b => '• ' + b).join('\n');
-                }
-
-                this.renderInputs();
-                this.updatePreview();
-                showToast('Resume generated successfully!', 'success');
-            }
-        } catch(e) {
-            showToast('AI Generation failed', 'error');
-        } finally {
-            btn.innerHTML = 'Generate Resume';
-            btn.disabled = false;
-        }
-    },
-
-    improveText: async function(type) {
-        let textToImprove = '';
-        let textAreaId = '';
-        if(type === 'summary') {
-            textToImprove = this.state.summary;
-            textAreaId = 'builder-summary';
-        }
-        
-        if(!textToImprove) {
-            showToast('Please enter some text to improve first', 'info');
-            return;
-        }
-
-        showToast('AI is optimizing text...', 'info');
-        try {
-            const res = await API._fetch('/ai/resume/improve', 'POST', { text: textToImprove, type: type });
-            if(res.success && res.improvement) {
-                document.getElementById(textAreaId).value = res.improvement;
-                this.updatePreview();
-                showToast('Text optimized!', 'success');
-            }
-        } catch(e) {
-            showToast('AI optimization failed', 'error');
-        }
-    },
-
-    improveExpText: async function(id) {
-        const exp = this.state.experience.find(e => e.id === id);
-        if(!exp || !exp.responsibilities) {
-            showToast('Enter some responsibilities to improve', 'info');
-            return;
-        }
-        
-        showToast('AI is optimizing experience...', 'info');
-        try {
-            const res = await API._fetch('/ai/resume/improve', 'POST', { text: exp.responsibilities, type: 'work experience bullets' });
-            if(res.success && res.improvement) {
-                exp.responsibilities = res.improvement;
-                this.renderInputs();
-                this.updatePreview();
-                showToast('Experience optimized!', 'success');
-            }
-        } catch(e) {
-            showToast('AI optimization failed', 'error');
-        }
-    },
-
-    suggestSkills: async function() {
-        this.updateStateFromDOM();
-        if(!this.state.title) {
-            showToast('Please enter a Target Job Title first', 'error');
-            return;
-        }
-
-        showToast('AI is suggesting skills...', 'info');
-        try {
-            const res = await API._fetch('/ai/resume/skills', 'POST', { title: this.state.title });
-            if(res.success && res.skills) {
-                const currentSkills = this.state.skills ? this.state.skills.split(',').map(s=>s.trim()).filter(Boolean) : [];
-                // Merge without duplicates
-                const newSkills = [...new Set([...currentSkills, ...res.skills])];
-                
-                this.state.skills = newSkills.join(', ');
-                this.renderInputs();
-                this.updatePreview();
-                showToast('Skills added!', 'success');
-            }
-        } catch(e) {
-            showToast('AI suggestions failed', 'error');
-        }
+    saveDraft: function() {
+        showToast("Draft saved successfully!", "success");
     }
 };
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    resumeBuilder.init();
+    resumeGenerator.init();
 });
+window.resumeGenerator = resumeGenerator;

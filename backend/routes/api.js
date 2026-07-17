@@ -137,7 +137,7 @@ router.get('/profile', auth, async (req, res) => {
 });
 
 router.put('/profile', auth, async (req, res) => {
-    const { full_name, industry, skills, experience_level, country, city, portfolio_url, linkedin_url, career_interests, role, is_complete } = req.body;
+    const { full_name, industry, skills, experience_level, country, city, linkedin_url, career_interests, role, is_complete } = req.body;
 
     try {
         const result = await pool.query(
@@ -148,14 +148,13 @@ router.put('/profile', auth, async (req, res) => {
                  experience_level = COALESCE($4, experience_level), 
                  country = COALESCE($5, country), 
                  city = COALESCE($6, city), 
-                 portfolio_url = COALESCE($7, portfolio_url), 
-                 linkedin_url = COALESCE($8, linkedin_url),
-                 career_interests = COALESCE($9, career_interests),
-                 role = COALESCE($10, role),
-                 is_complete = COALESCE($11, is_complete)
-             WHERE user_id = $12 
+                 linkedin_url = COALESCE($7, linkedin_url),
+                 career_interests = COALESCE($8, career_interests),
+                 role = COALESCE($9, role),
+                 is_complete = COALESCE($10, is_complete)
+             WHERE user_id = $11 
              RETURNING *`,
-            [full_name, industry, skills, experience_level, country, city, portfolio_url, linkedin_url, career_interests, role, (is_complete === true ? 1 : (is_complete === false ? 0 : null)), req.user.id]
+            [full_name, industry, skills, experience_level, country, city, linkedin_url, career_interests, role, (is_complete === true ? 1 : (is_complete === false ? 0 : null)), req.user.id]
         );
 
         res.json({ success: true, profile: result.rows[0], message: 'Profile updated successfully!' });
@@ -288,62 +287,7 @@ router.put('/profile/resume-builder', auth, async (req, res) => {
 });
 
 // ==========================================
-// PORTFOLIO UPLOAD & MANAGEMENT
-// ==========================================
-router.post('/profile/portfolio', auth, upload.single('portfolio'), async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: 'No file uploaded or file type is unsupported' });
-    }
 
-    try {
-        const fileName = req.file.originalname;
-        const relativeUrl = `/uploads/portfolios/${req.file.filename}`;
-
-        // Save to profiles table
-        await pool.query(
-            `UPDATE profiles 
-             SET portfolio_url = $1
-             WHERE user_id = $2`,
-            [relativeUrl, req.user.id]
-        );
-
-        res.json({
-            success: true,
-            message: 'Portfolio deck uploaded successfully!',
-            portfolioUrl: relativeUrl,
-            portfolioFilename: fileName
-        });
-    } catch (err) {
-        console.error('Portfolio upload error:', err.message);
-        res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
-});
-
-router.delete('/profile/portfolio', auth, async (req, res) => {
-    try {
-        const profile = await pool.query('SELECT portfolio_url FROM profiles WHERE user_id = $1', [req.user.id]);
-        if (profile.rows.length > 0 && profile.rows[0].portfolio_url) {
-            const relUrl = profile.rows[0].portfolio_url;
-            const absolutePath = path.join(__dirname, '..', relUrl);
-            
-            if (fs.existsSync(absolutePath)) {
-                fs.unlinkSync(absolutePath);
-            }
-        }
-
-        await pool.query(
-            `UPDATE profiles 
-             SET portfolio_url = NULL
-             WHERE user_id = $1`,
-            [req.user.id]
-        );
-
-        res.json({ success: true, message: 'Portfolio deck deleted successfully!' });
-    } catch (err) {
-        console.error('Portfolio delete error:', err.message);
-        res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
-});
 
 // ==========================================
 // JOBS MODULE
@@ -639,42 +583,252 @@ router.post('/ai/resume', auth, async (req, res) => {
     res.json({ success: true, suggestion });
 });
 
-router.post('/ai/resume/generate', auth, async (req, res) => {
-    const { title, bio, skills, jobDescription } = req.body;
-    let prompt = `User Title: ${title}\nBio: ${bio}\nSkills: ${skills ? skills.join(', ') : 'None provided'}\n`;
-    if (jobDescription) {
-        prompt += `Target Job Description: ${jobDescription}\nTailor the summary and experience specifically to match this job description closely and pass ATS systems.\n`;
+// Parse Resume for AI Generator
+router.post('/ai/resume/parse', auth, upload.single('resume'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
-    prompt += `Generate a professional summary (3-4 sentences) and 3 high-impact bullet points of hypothetical relevant experience for a resume targeting this title. Format as JSON: {"summary": "...", "experienceBullets": ["...", "...", "..."]}`;
-    const sysInstruction = `You are an elite executive resume consultant. Output valid JSON only, without markdown wrappers.`;
+    try {
+        const filePath = req.file.path;
+        const fileName = req.file.originalname;
+        const extractedText = await extractTextFromFile(filePath, fileName);
+        
+        // Clean up file after extracting text to save space
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+
+        res.json({ success: true, text: extractedText });
+    } catch (e) {
+        console.error('Failed to parse uploaded resume:', e);
+        res.status(500).json({ success: false, message: 'Failed to extract text from resume' });
+    }
+});
+
+router.post('/ai/resume/generate', auth, async (req, res) => {
+    const { resumeText, jobDescription } = req.body;
+    
+    if (!resumeText) {
+        return res.status(400).json({ success: false, message: 'Resume text is required' });
+    }
+
+    let prompt = `Here is my current resume text:\n\n${resumeText}\n\n`;
+    if (jobDescription) {
+        prompt += `Here is the Target Job Description:\n\n${jobDescription}\n\nTailor the resume specifically to match this job description closely to maximize the ATS match rate.\n`;
+    } else {
+        prompt += `Optimize this resume to be highly professional, impactful, and ATS-friendly for its industry.\n`;
+    }
+    
+    prompt += `Generate a perfectly formatted resume structured as a valid JSON object. Do not include markdown formatting or backticks. The JSON must exactly match this structure:
+{
+  "personal": {
+    "name": "Full Name",
+    "title": "Target Job Title",
+    "email": "Email",
+    "location": "City, Country",
+    "phone": "Phone (if any)",
+    "linkedin": "LinkedIn (if any)"
+  },
+  "summary": "A 3-4 sentence powerful professional summary tailored to the target role.",
+  "experience": [
+    {
+      "title": "Job Title",
+      "company": "Company Name",
+      "date": "Start - End Date",
+      "description": ["High impact bullet point starting with an action verb", "Another bullet point"]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Degree Name",
+      "school": "School Name",
+      "year": "Graduation Year"
+    }
+  ],
+  "skills": ["Skill 1", "Skill 2", "Skill 3"],
+  "aiFeedback": {
+    "atsScore": 85,
+    "strengths": ["Strength 1", "Strength 2"],
+    "improvements": ["Improvement 1", "Improvement 2"]
+  }
+}`;
+
+    const sysInstruction = `You are an elite executive resume consultant and ATS algorithm expert. Output valid JSON only, without markdown wrappers. Ensure the resume sounds highly professional, quantifiable, and action-oriented.`;
     
     try {
         const resultText = await callGemini(prompt, sysInstruction);
-        // Clean JSON in case model includes markdown wrappers
         const cleaned = resultText.replace(/```json/gi, '').replace(/```/g, '').trim();
         const data = JSON.parse(cleaned);
         res.json({ success: true, generated: data });
     } catch(e) {
-        res.status(500).json({ success: false, message: 'Failed to parse AI response' });
+        console.error("Resume generation failed:", e);
+        res.status(500).json({ success: false, message: 'Failed to generate AI Resume' });
     }
 });
 
-router.post('/ai/resume/improve', auth, async (req, res) => {
-    const { text, type } = req.body;
-    const prompt = `Rewrite the following ${type} to be more professional, action-oriented, and ATS-optimized:\n\n"${text}"`;
-    const sysInstruction = `You are a professional resume writer. Provide the improved text directly without conversational filler.`;
-    
-    const improvement = await callGemini(prompt, sysInstruction);
-    res.json({ success: true, improvement });
+// Learning AI Endpoint
+router.get('/ai/learning/roadmap', auth, async (req, res) => {
+    try {
+        const profileRes = await pool.query('SELECT industry, role, resume_text FROM profiles WHERE user_id = $1', [req.user.id]);
+        let context = "";
+        if (profileRes.rows.length > 0) {
+            const p = profileRes.rows[0];
+            context += `User Role: ${p.role || 'Unknown'}\n`;
+            context += `User Industry: ${p.industry || 'Unknown'}\n`;
+            if (p.resume_text) {
+                context += `User Resume Summary/Skills: ${p.resume_text.substring(0, 1000)}\n`;
+            }
+        } else {
+            context = "User Profile: General Professional";
+        }
+
+        const prompt = `Based on the following user context, generate a learning roadmap to help them level up in their career.\n\n${context}\n\nFormat as JSON exactly like this:
+{
+    "roadmap": {
+        "title": "Senior [Role] Roadmap",
+        "checkpoint": "Next big milestone skill"
+    },
+    "courses": [
+        {
+            "tag": "Category (e.g. Architecture)",
+            "title": "Course Title",
+            "instructor": "Instructor Name • Title",
+            "progress": 0,
+            "tagClass": "badge-primary",
+            "color": "var(--primary)"
+        },
+        {
+            "tag": "Category (e.g. Design)",
+            "title": "Course Title",
+            "instructor": "Instructor Name • Title",
+            "progress": 0,
+            "tagClass": "badge-secondary",
+            "color": "var(--secondary)"
+        },
+        {
+            "tag": "Category (e.g. Soft Skills)",
+            "title": "Course Title",
+            "instructor": "Instructor Name • Title",
+            "progress": 0,
+            "tagClass": "badge-primary",
+            "color": "var(--accent)"
+        }
+    ]
+}
+Provide exactly 3 recommended courses. Progress should be 0 since they are newly recommended.`;
+
+        const sysInstruction = `You are an expert career coach AI. Output valid JSON only, without markdown wrappers.`;
+        
+        const resultText = await callGemini(prompt, sysInstruction);
+        const cleaned = resultText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const data = JSON.parse(cleaned);
+        
+        res.json({ success: true, learningData: data });
+    } catch (e) {
+        console.error("Learning roadmap generation failed:", e);
+        res.status(500).json({ success: false, message: 'Failed to generate AI roadmap' });
+    }
 });
 
-router.post('/ai/resume/skills', auth, async (req, res) => {
-    const { title } = req.body;
-    const prompt = `List 8 high-impact technical and soft skills for a "${title}" resume. Return ONLY a comma-separated list of the skills.`;
-    const sysInstruction = `You are an expert recruiter. Return a single comma-separated list without bullets or numbering.`;
-    
-    const skillsList = await callGemini(prompt, sysInstruction);
-    res.json({ success: true, skills: skillsList.split(',').map(s => s.trim()) });
+router.post('/ai/resume/export-docx', auth, async (req, res) => {
+    try {
+        const { resumeData } = req.body;
+        if (!resumeData) return res.status(400).send('Resume data is required');
+
+        const children = [];
+
+        // Personal Info
+        if (resumeData.personal) {
+            children.push(new Paragraph({
+                text: resumeData.personal.name || 'Your Name',
+                heading: HeadingLevel.HEADING_1,
+                alignment: "center"
+            }));
+            
+            const contact = [];
+            if (resumeData.personal.email) contact.push(resumeData.personal.email);
+            if (resumeData.personal.phone) contact.push(resumeData.personal.phone);
+            if (resumeData.personal.location) contact.push(resumeData.personal.location);
+            if (resumeData.personal.linkedin) contact.push(resumeData.personal.linkedin);
+            
+            children.push(new Paragraph({
+                text: contact.join(' | '),
+                alignment: "center",
+                spacing: { after: 200 }
+            }));
+        }
+
+        // Summary
+        if (resumeData.summary) {
+            children.push(new Paragraph({ text: "Professional Summary", heading: HeadingLevel.HEADING_2 }));
+            children.push(new Paragraph({ text: resumeData.summary, spacing: { after: 200 } }));
+        }
+
+        // Experience
+        if (resumeData.experience && resumeData.experience.length > 0) {
+            children.push(new Paragraph({ text: "Experience", heading: HeadingLevel.HEADING_2 }));
+            resumeData.experience.forEach(exp => {
+                children.push(new Paragraph({
+                    children: [
+                        new TextRun({ text: exp.title || '', bold: true }),
+                        new TextRun({ text: ` | ${exp.company || ''}`, italics: true }),
+                    ]
+                }));
+                if (exp.date) {
+                    children.push(new Paragraph({ text: exp.date, spacing: { after: 100 } }));
+                }
+                
+                if (exp.description && exp.description.length > 0) {
+                    exp.description.forEach(bullet => {
+                        children.push(new Paragraph({
+                            text: bullet,
+                            bullet: { level: 0 }
+                        }));
+                    });
+                }
+                children.push(new Paragraph({ text: "", spacing: { after: 100 } })); // Spacer
+            });
+        }
+
+        // Education
+        if (resumeData.education && resumeData.education.length > 0) {
+            children.push(new Paragraph({ text: "Education", heading: HeadingLevel.HEADING_2 }));
+            resumeData.education.forEach(edu => {
+                children.push(new Paragraph({
+                    children: [
+                        new TextRun({ text: edu.degree || '', bold: true }),
+                        new TextRun({ text: ` - ${edu.school || ''}` }),
+                    ]
+                }));
+                if (edu.year) {
+                    children.push(new Paragraph({ text: edu.year, spacing: { after: 100 } }));
+                }
+            });
+        }
+
+        // Skills
+        if (resumeData.skills && resumeData.skills.length > 0) {
+            children.push(new Paragraph({ text: "Skills", heading: HeadingLevel.HEADING_2 }));
+            children.push(new Paragraph({ text: resumeData.skills.join(', '), spacing: { after: 200 } }));
+        }
+
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: children
+            }]
+        });
+
+        const b64string = await Packer.toBase64String(doc);
+        const buffer = Buffer.from(b64string, 'base64');
+        
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        res.setHeader('Content-Disposition', 'attachment; filename=GigFlow_Resume.docx');
+        res.send(buffer);
+    } catch (e) {
+        console.error("DOCX export error:", e);
+        res.status(500).send("Failed to export DOCX");
+    }
 });
 
 // ATS checker
@@ -752,6 +906,37 @@ router.get('/cover-letters', auth, async (req, res) => {
     } catch (err) {
         console.error('Fetch cover letters error:', err.message);
         res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+router.post('/ai/cover-letter/export-docx', auth, async (req, res) => {
+    try {
+        const { content } = req.body;
+        if (!content) return res.status(400).send('Cover letter content is required');
+
+        const paragraphs = content.split('\n').map(text => {
+            return new Paragraph({
+                text: text.trim(),
+                spacing: { after: 200 }
+            });
+        });
+
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: paragraphs
+            }]
+        });
+
+        const b64string = await Packer.toBase64String(doc);
+        const buffer = Buffer.from(b64string, 'base64');
+        
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        res.setHeader('Content-Disposition', 'attachment; filename=GigFlow_Cover_Letter.docx');
+        res.send(buffer);
+    } catch (e) {
+        console.error("Cover Letter DOCX export error:", e);
+        res.status(500).send("Failed to export DOCX");
     }
 });
 
@@ -926,6 +1111,48 @@ router.post('/resume/export-docx', auth, async (req, res) => {
     } catch (err) {
         console.error('DOCX Export error:', err);
         res.status(500).send('Error generating DOCX');
+    }
+});
+// ==========================================
+// AI INTERVIEW CENTER
+// ==========================================
+router.post('/ai/interview/chat', auth, async (req, res) => {
+    try {
+        const { messages, role, mode } = req.body;
+        
+        let systemPrompt = `You are an AI interviewer representing a company. You are conducting an interview for the role of ${role}.
+        The interview mode is ${mode} (if audio, keep answers shorter and conversational. If typing, you can be slightly more detailed but keep it to one or two paragraphs max).
+        You should act professionally, ask insightful technical or behavioral questions relevant to the role, and respond to the candidate's answers.
+        Do not output any markdown formatting or special characters if in audio mode, just plain text.
+        Your goal is to evaluate the candidate and ask 3-5 questions before ending the interview.
+        Always respond in character. Do not break character.`;
+
+        // Format history for Gemini
+        const chatHistory = messages.map(m => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.text }]
+        }));
+
+        // Call Gemini
+        const promptText = `System Prompt: ${systemPrompt}\n\nPlease provide your next response as the interviewer.`;
+        if (chatHistory.length > 0) {
+            chatHistory[chatHistory.length - 1].parts[0].text += `\n\n${promptText}`;
+        } else {
+            chatHistory.push({ role: 'user', parts: [{ text: promptText }] });
+        }
+
+        let aiText = "Thank you for joining. Let's start the interview.";
+        try {
+            aiText = await callGemini(chatHistory[chatHistory.length - 1].parts[0].text);
+        } catch (e) {
+            console.error('Gemini error:', e);
+            aiText = "Can you tell me more about your experience?";
+        }
+
+        res.json({ success: true, text: aiText });
+    } catch (err) {
+        console.error('AI Interview error:', err);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 

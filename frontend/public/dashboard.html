@@ -279,6 +279,201 @@
                             <h3 style="font-size: 1.2rem; font-weight: 800;">Top Job Matches</h3>
                             <span class="badge badge-primary">AI Picked</span>
                         </div>
+            gap: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .gamification-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .gamify-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .gamify-icon-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--primary-container);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 1s ease-in-out;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .qa-btn {
+            background: var(--surface-low);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        .qa-btn:hover {
+            background: var(--surface);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .qa-btn .material-symbols-outlined {
+            font-size: 28px;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+        .qa-btn:hover .material-symbols-outlined {
+            color: var(--primary);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid-premium { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .gamification-row { grid-template-columns: 1fr; }
+            .coach-checklist { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="app-shell container">
+        <!-- Sidebar Placeholder -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content fade-in" style="padding-bottom: 60px;">
+            
+            <!-- Daily AI Coach -->
+            <div class="ai-coach-banner" style="margin-bottom: 24px;">
+                <div>
+                    <h1 id="coach-greeting" style="font-size: 2rem; font-weight: 800; margin-bottom: 8px;">Good Morning! ☀️</h1>
+                    <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 20px;">Today's focus: You have 3 tasks to maximize your job search.</p>
+                    
+                    <div class="coach-checklist">
+                        <div class="coach-task">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            Finish 2 Applications
+                        </div>
+                        <div class="coach-task">
+                            <span class="material-symbols-outlined">edit_document</span>
+                            Tailor Resume for Stripe
+                        </div>
+                        <div class="coach-task">
+                            <span class="material-symbols-outlined">record_voice_over</span>
+                            Practice Interview
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 16px 24px; border-radius: 16px; backdrop-filter: blur(10px);">
+                    <div style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; opacity: 0.8; margin-bottom: 4px;">Est. Time</div>
+                    <div style="font-size: 2rem; font-weight: 800;">45<span style="font-size: 1rem;">m</span></div>
+                </div>
+            </div>
+
+            <!-- Gamification Row -->
+            <div class="gamification-row">
+                <div class="gamify-card">
+                    <div class="gamify-icon-wrap" style="background: rgba(255, 140, 0, 0.15); color: #ff8c00;">
+                        <span class="material-symbols-outlined">local_fire_department</span>
+                    </div>
+                    <div>
+                        <p style="margin:0; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Application Streak</p>
+                        <h4 style="margin:0; font-size: 1.25rem; font-weight: 800;">5 Days</h4>
+                    </div>
+                </div>
+                <div class="gamify-card">
+                    <div class="gamify-icon-wrap">
+                        <span class="material-symbols-outlined">stars</span>
+                    </div>
+                    <div>
+                        <p style="margin:0; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Current Level</p>
+                        <h4 style="margin:0; font-size: 1.25rem; font-weight: 800;">XP Level 12</h4>
+                    </div>
+                </div>
+                <div class="gamify-card">
+                    <div class="gamify-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                        <span class="material-symbols-outlined">target</span>
+                    </div>
+                    <div>
+                        <p style="margin:0; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Weekly Goal</p>
+                        <h4 style="margin:0; font-size: 1.25rem; font-weight: 800;">7/10 Apps</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-row">
+                <div class="premium-stat">
+                    <span class="material-symbols-outlined icon">description</span>
+                    <h3 id="stat-active">0</h3>
+                    <p>Active Applications</p>
+                </div>
+                <div class="premium-stat">
+                    <span class="material-symbols-outlined icon" style="color: #8b5cf6;">bookmark</span>
+                    <h3 id="stat-saved">0</h3>
+                    <p>Saved Jobs</p>
+                </div>
+                <div class="premium-stat">
+                    <span class="material-symbols-outlined icon" style="color: #f59e0b;">event</span>
+                    <h3 id="stat-interviews">0</h3>
+                    <p>Upcoming Interviews</p>
+                </div>
+                <div class="premium-stat">
+                    <span class="material-symbols-outlined icon" style="color: #10b981;">fact_check</span>
+                    <h3 id="stat-ats">82%</h3>
+                    <p>Average ATS Score</p>
+                </div>
+            </div>
+
+            <div class="dashboard-grid-premium">
+                
+                <!-- Left Column (Main Activity) -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    
+                    <div class="glass-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="font-size: 1.2rem; font-weight: 800;">Recent Applications</h3>
+                            <a href="application-tracker.html" style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">View Board</a>
+                        </div>
+                        <div id="dashboard-recent-applications" style="display: flex; flex-direction: column; gap: 12px;">
+                            <!-- Handled by dashboard.js -->
+                        </div>
+                    </div>
+
+                    <div class="glass-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="font-size: 1.2rem; font-weight: 800;">Top Job Matches</h3>
+                            <span class="badge badge-primary">AI Picked</span>
+                        </div>
                         <div id="dashboard-recommended-jobs" style="display: flex; flex-direction: column; gap: 12px;">
                             <!-- Handled by dashboard.js -->
                         </div>
@@ -300,7 +495,8 @@
                                 85%
                             </div>
                         </div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Add your portfolio link to reach 100%.</p>
+                        <h3 style="font-size: 1.15rem; margin-bottom: 8px;">Complete your Profile</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Add your resume to reach 100%.</p>
                         <button class="btn btn-outline w-full" onclick="location.href='profile.html'">Update Profile</button>
                     </div>
 
@@ -336,7 +532,6 @@
                     </div>
 
                 </div>
-            </div>
         </main>
     </div>
 

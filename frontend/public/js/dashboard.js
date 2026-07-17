@@ -127,7 +127,7 @@ function calculateProfileCompletion() {
         if (profile.experience_level) completion += 15;
         if (profile.industry) completion += 15;
         if (profile.skills && profile.skills.length > 0) completion += 15;
-        if (profile.portfolio_url) completion += 15;
+        if (profile.resume_url) completion += 15;
     }
 
     const ring = document.querySelector('.progress-ring-circle');

@@ -176,40 +176,6 @@
                             <span class="material-symbols-outlined">groups</span>
                             <h4>Panel</h4>
                             <p style="font-size: 0.8rem; color: var(--text-muted);">Team Interview</p>
-                        </div>
-                    </div>
-                    
-                    <button class="btn btn-primary" style="padding: 12px 32px; font-size: 1.1rem;" onclick="startInterview()">Start Interview</button>
-                </div>
-
-                <!-- Active Interview Screen -->
-                <div class="active-interview-screen" id="interview-active">
-                    <div class="video-grid">
-                        <div class="video-feed">
-                            <!-- Placeholder for AI Video. In a real app, this would be a WebGL or Video stream -->
-                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800" alt="AI Interviewer" id="ai-video-stream">
-                            <div class="feed-label" id="ai-interviewer-label">Sarah (HR)</div>
-                            <div class="subtitles" id="ai-subtitles" style="display: none;">
-                                <span>Hello! Let's start by discussing your recent experience...</span>
-                            </div>
-                        </div>
-                        <div class="video-feed">
-                            <div style="color: white; font-size: 3rem;" class="material-symbols-outlined">account_circle</div>
-                            <div class="feed-label">You</div>
-                        </div>
-                    </div>
-                    
-                    <div class="controls">
-                        <button class="control-btn btn-mic" onclick="toggleMic(this)"><span class="material-symbols-outlined">mic</span></button>
-                        <button class="control-btn btn-cam" onclick="toggleCam(this)"><span class="material-symbols-outlined">videocam</span></button>
-                        <button class="control-btn btn-end" onclick="endInterview()"><span class="material-symbols-outlined">call_end</span></button>
-                    </div>
-                </div>
-
-            </div>
-        </main>
-    </div>
-
     <!-- Scripts -->
     <script src="js/storage.js"></script>
     <script src="js/api.js"></script>

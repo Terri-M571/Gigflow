@@ -125,7 +125,7 @@
                                 <input class="form-control" type="text" id="profile-languages" placeholder="e.g. English, Spanish (Fluent)">
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="profile-links">Portfolio Link / Social Links</label>
+                                <label class="form-label" for="profile-links">Social Links</label>
                                 <input class="form-control" type="url" id="profile-links" placeholder="e.g. https://alexrivera.design">
                             </div>
                         </div>
@@ -150,7 +150,7 @@
                                     <div id="resume-progress-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.1s ease;"></div>
                                 </div>
                                 <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                                    <button type="button" class="btn btn-outline" style="font-size: 0.75rem; padding: 6px 12px;" onclick="document.getElementById('profile-resume-input').click()">Upload Resume</button>
+                                    <button type="button" id="upload-resume-btn" class="btn btn-outline" style="font-size: 0.75rem; padding: 6px 12px;" onclick="document.getElementById('profile-resume-input').click()">Upload Resume</button>
                                     <button type="button" id="delete-resume-btn" class="btn btn-ghost" style="font-size: 0.75rem; padding: 6px 12px; color: var(--error); display: none;" onclick="deleteResume()">Delete</button>
                                 </div>
                                 <input type="file" id="profile-resume-input" accept=".pdf,.docx" style="display:none;">
