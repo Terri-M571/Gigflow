@@ -5,8 +5,8 @@ GigFlow is an AI-powered full-stack career ecosystem that combines job searching
 ## Architecture
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3.
 - **Backend**: Node.js, Express.js.
-- **Database**: PostgreSQL (via Supabase) with automatic fallback to local SQLite for development.
-- **Authentication**: Supabase Auth (with automatic fallback to a Local Secure Emulator).
+- **Database**: Local SQLite (`gigflow.db`).
+- **Authentication**: Local Secure Emulator using SQLite.
 - **AI Integration**: Google Gemini API.
 
 ## Environment Variables
@@ -20,7 +20,6 @@ To unlock the full functionality of GigFlow (AI generation, real databases, prop
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-DATABASE_URL=postgresql://postgres:password@db.your-supabase-url.supabase.co:5432/postgres
 JWT_SECRET=your_random_jwt_secret_string
 
 # AI Integrations
@@ -29,7 +28,7 @@ GEMINI_API_KEY=your_google_gemini_api_key
 # Port Configuration
 PORT=5000
 ```
-*Note: If any keys are missing, the server will intentionally print a `STARTUP WARNING` to the console and safely fall back to simulated offline modes (SQLite + Auth Emulators + Simulated AI) so you can still test the UI!*
+*Note: If any keys are missing, the server will intentionally print a `STARTUP WARNING` to the console and safely fall back to simulated offline modes (Auth Emulators + Simulated AI) so you can still test the UI!*
 
 ## Local Installation & Running
 

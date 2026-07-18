@@ -34,7 +34,6 @@
     "passport-linkedin-oauth2": "^2.0.0",
     "passport-microsoft": "^1.0.0",
     "pdf-parse": "^1.1.1",
-    "pg": "^8.12.0",
     "sqlite3": "^6.0.1"
   },
   "devDependencies": {

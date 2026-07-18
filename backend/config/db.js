@@ -1,46 +1,15 @@
-const { Pool } = require('pg');
 const sqlite3 = require('sqlite3');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
-let pgPool = null;
-let sqliteDb = null;
-let dbType = 'postgres'; // 'postgres' or 'sqlite'
+const dbPath = path.join(__dirname, '../gigflow.db');
+console.log(`💾 Initializing local SQLite database at: ${dbPath}`);
 
-// Attempt to check if PG is configured and running
-const isPgConfigured = process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost:5432');
+const sqliteDb = new sqlite3.Database(dbPath);
 
-if (isPgConfigured) {
-    try {
-        pgPool = new Pool({
-            connectionString: process.env.DATABASE_URL,
-            ssl: { rejectUnauthorized: false }
-        });
-        console.log('🔌 PostgreSQL database pool initialized.');
-    } catch (e) {
-        console.warn('⚠️ Failed to initialize PostgreSQL pool, falling back to SQLite:', e.message);
-        dbType = 'sqlite';
-    }
-} else {
-    console.warn('⚠️ PostgreSQL URL not fully configured for remote access, checking local database.');
-    // Test local PG connection briefly
-    pgPool = new Pool({
-        connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/postgres',
-        connectionTimeoutMillis: 2000
-    });
-}
-
-// Function to initialize SQLite
-function initSqlite() {
-    dbType = 'sqlite';
-    const dbPath = path.join(__dirname, '../gigflow.db');
-    console.log(`💾 Falling back to local SQLite database at: ${dbPath}`);
-    
-    sqliteDb = new sqlite3.Database(dbPath);
-    
-    // Create relational tables for SQLite
-    sqliteDb.serialize(() => {
+// Create relational tables for SQLite
+sqliteDb.serialize(() => {
         // Users Table
         sqliteDb.run(`
             CREATE TABLE IF NOT EXISTS users (
@@ -258,98 +227,51 @@ function initSqlite() {
             }
         });
     });
-}
+});
 
 // Wrapper DB object
 const db = {
-    getDbType: () => dbType,
+    getDbType: () => 'sqlite',
     
     query: (text, params = []) => {
         return new Promise((resolve, reject) => {
-            if (dbType === 'postgres') {
-                pgPool.query(text, params, (err, res) => {
-                    if (err) {
-                        // If PostgreSQL fails to connect mid-run, let's gracefully switch to SQLite on the fly!
-                        if (err.code === 'ECONNREFUSED' || err.message.includes('connect')) {
-                            console.error('❌ Lost connection to PostgreSQL. Switching database to local SQLite...');
-                            initSqlite();
-                            // Re-run query on SQLite
-                            return resolve(db.query(text, params));
-                        }
-                        return reject(err);
-                    }
-                    resolve(res);
-                });
-            } else {
-                // SQLite execution path
-                // Translate syntax: ILIKE -> LIKE, $1 -> ?
-                let sql = text.replace(/ILIKE/g, 'LIKE').replace(/\$\d+/g, '?');
-                
-                // SQLite array handling: profiles skills/interests arrays
-                const mappedParams = params.map(p => {
-                    if (Array.isArray(p)) {
-                        return JSON.stringify(p);
-                    }
-                    if (typeof p === 'boolean') {
-                        return p ? 1 : 0;
-                    }
-                    return p;
-                });
-
-                const isInsertOrUpdate = sql.trim().toUpperCase().startsWith('INSERT') || 
-                                         sql.trim().toUpperCase().startsWith('UPDATE') ||
-                                         sql.trim().toUpperCase().startsWith('DELETE');
-
-                if (isInsertOrUpdate) {
-                    sqliteDb.all(sql, mappedParams, (err, rows) => {
-                        if (err) return reject(err);
-                        
-                        // Parse JSON fields back to arrays
-                        const processedRows = (rows || []).map(row => {
-                            if (row.skills && typeof row.skills === 'string') {
-                                try { row.skills = JSON.parse(row.skills); } catch(e){}
-                            }
-                            if (row.career_interests && typeof row.career_interests === 'string') {
-                                try { row.career_interests = JSON.parse(row.career_interests); } catch(e){}
-                            }
-                            return row;
-                        });
-
-                        resolve({ rows: processedRows, rowCount: processedRows.length });
-                    });
-                } else {
-                    sqliteDb.all(sql, mappedParams, (err, rows) => {
-                        if (err) return reject(err);
-
-                        // Parse JSON fields back to arrays
-                        const processedRows = (rows || []).map(row => {
-                            if (row.skills && typeof row.skills === 'string') {
-                                try { row.skills = JSON.parse(row.skills); } catch(e){}
-                            }
-                            if (row.career_interests && typeof row.career_interests === 'string') {
-                                try { row.career_interests = JSON.parse(row.career_interests); } catch(e){}
-                            }
-                            return row;
-                        });
-
-                        resolve({ rows: processedRows, rowCount: processedRows.length });
-                    });
+            // SQLite execution path
+            // Translate syntax: ILIKE -> LIKE, $1 -> ?
+            let sql = text.replace(/ILIKE/g, 'LIKE').replace(/\$\d+/g, '?');
+            
+            // SQLite array handling: profiles skills/interests arrays
+            const mappedParams = params.map(p => {
+                if (Array.isArray(p)) {
+                    return JSON.stringify(p);
                 }
-            }
+                if (typeof p === 'boolean') {
+                    return p ? 1 : 0;
+                }
+                return p;
+            });
+
+            const isInsertOrUpdate = sql.trim().toUpperCase().startsWith('INSERT') || 
+                                     sql.trim().toUpperCase().startsWith('UPDATE') ||
+                                     sql.trim().toUpperCase().startsWith('DELETE');
+
+            sqliteDb.all(sql, mappedParams, (err, rows) => {
+                if (err) return reject(err);
+                
+                // Parse JSON fields back to arrays
+                const processedRows = (rows || []).map(row => {
+                    if (row.skills && typeof row.skills === 'string') {
+                        try { row.skills = JSON.parse(row.skills); } catch(e){}
+                    }
+                    if (row.career_interests && typeof row.career_interests === 'string') {
+                        try { row.career_interests = JSON.parse(row.career_interests); } catch(e){}
+                    }
+                    return row;
+                });
+
+                resolve({ rows: processedRows, rowCount: processedRows.length });
+            });
         });
     }
 };
-
-// Initialize connectivity checks
-if (dbType === 'postgres') {
-    pgPool.query('SELECT NOW()', (err, res) => {
-        if (err) {
-            console.error('❌ Local PostgreSQL database is offline or failed. Error details:', err.message);
-            initSqlite();
-        } else {
-            console.log('✅ PostgreSQL database successfully connected.');
-        }
-    });
-}
 
 module.exports = db;

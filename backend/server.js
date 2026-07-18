@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 // Environment Variable Hardening
-const criticalVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'GEMINI_API_KEY', 'DATABASE_URL'];
+const criticalVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'GEMINI_API_KEY'];
 const missingVars = criticalVars.filter(v => !process.env[v] || process.env[v].includes('placeholder'));
 if (missingVars.length > 0) {
     console.warn('\n=============================================================');
