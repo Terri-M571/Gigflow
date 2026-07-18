@@ -1,63 +1,65 @@
 # GigFlow – Where Opportunities Flow to You
 
-GigFlow is an AI-powered career ecosystem that combines job searching, freelancing, AI career tools, professional development, career coaching, learning resources, and career analytics into one seamless platform.
+GigFlow is an AI-powered full-stack career ecosystem that combines job searching, freelancing, AI career tools, professional development, career coaching, learning resources, and career analytics into one seamless platform.
 
-This application is built using ONLY native HTML5, CSS3 (Vanilla CSS), and Vanilla JavaScript. No node modules, frameworks, or dependencies are required.
+## Architecture
+- **Frontend**: Vanilla JavaScript, HTML5, CSS3.
+- **Backend**: Node.js, Express.js.
+- **Database**: PostgreSQL (via Supabase) with automatic fallback to local SQLite for development.
+- **Authentication**: Supabase Auth (with automatic fallback to a Local Secure Emulator).
+- **AI Integration**: Google Gemini API.
 
-## Folder Structure
+## Environment Variables
+To unlock the full functionality of GigFlow (AI generation, real databases, proper authentication), you must configure your environment variables. 
 
+### Local Development
+1. Create a file named `.env` in the root folder of the project (`GigFlow/.env`).
+2. Add the following keys (replace the placeholders with your actual keys):
+```env
+# Database & Authentication
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+DATABASE_URL=postgresql://postgres:password@db.your-supabase-url.supabase.co:5432/postgres
+JWT_SECRET=your_random_jwt_secret_string
+
+# AI Integrations
+GEMINI_API_KEY=your_google_gemini_api_key
+
+# Port Configuration
+PORT=5000
 ```
-GigFlow/
-│
-├── index.html                  # Landing Page / Portal
-├── login.html                  # Auth Portal
-├── signup.html                 # Auth Signup
-├── dashboard.html              # Main App Dashboard
-├── profile.html                # User Profile Manager
-├── jobs.html                   # Job Board / Listings
-├── job-details.html            # Job Details View
-├── freelance.html              # Freelance Project List
-├── project-details.html        # Freelance Project Details
-├── ats-checker.html            # AI ATS Score & Resume Keyword Tool
-├── resume-builder.html         # Live Resume Creator
-├── cover-letter.html           # AI Cover Letter Generator
-├── interview-prep.html         # AI Mock Interview Practice
-├── application-tracker.html    # Kanban Job tracking board
-├── learning.html               # Learning Roadmaps & Courses
-├── portfolio.html              # Interactive Portfolio Builder
-├── analytics.html              # Interactive Statistics Dashboard
-├── live-coach.html             # Live Chat & Coach Booking System
-├── settings.html               # User preferences & theme settings
-│
-├── css/
-│   ├── style.css               # Design system & theme tokens
-│   ├── dashboard.css           # Global layout & sidebar
-│   ├── pages.css               # Page-specific styling
-│   ├── animations.css          # Keyframes & shimmers
-│   └── responsive.css          # Mobile query overrides
-│
-└── js/
-    ├── app.js                  # Shared layouts & theme switcher
-    ├── auth.js                 # Authentication validator
-    ├── storage.js              # LocalStorage mock databases
-    ├── dashboard.js            # Dashboard logic
-    ├── jobs.js                 # Jobs listings manager
-    ├── freelance.js            # Freelance bids manager
-    ├── tracker.js              # Kanban board drag & drop
-    ├── analytics.js            # Visual SVG line/bar chart builder
-    └── profile.js              # Profile inputs manager
-```
+*Note: If any keys are missing, the server will intentionally print a `STARTUP WARNING` to the console and safely fall back to simulated offline modes (SQLite + Auth Emulators + Simulated AI) so you can still test the UI!*
 
-## Running the Application
+## Local Installation & Running
 
-1. Open your code editor (e.g. VS Code) in the `GigFlow/` folder.
-2. Double click `index.html` or open it using any browser of your choice.
-3. The platform will run instantly. Routing works via relative paths.
+1. Open your terminal in the `GigFlow/` folder.
+2. Install all dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the application:
+   ```bash
+   npm start
+   ```
+4. Open your browser and navigate to `http://localhost:5000`.
 
-## Key Features
+### Troubleshooting `EADDRINUSE: address already in use :::5000`
+If you encounter this error when running `npm start`, it means another server (or a previous instance of GigFlow) is still running in the background and holding Port 5000 hostage. 
+**Fix:** Close your other terminal windows or manually kill the Node.js process using your computer's task manager, then run `npm start` again.
 
-1. **Light / Dark Mode**: Theme switch persists across sessions using `localStorage` triggers.
-2. **Layout Injector**: Global navbar, sidebar, and footer elements are injected via standard JavaScript arrays dynamically, preventing repeated code while avoiding CORS issues when running from `file://` protocol.
-3. **Persisted Profile**: Profile editing forms save details immediately, including photo uploader support converting images to base64 URIs.
-4. **Kanban drag-and-drop**: Change status checkpoints of job applications by dragging cards directly on columns.
-5. **Interactive SVG Charts**: Progression graphs and application metrics charts drawn dynamically using customized math algorithms in JS and pure CSS vectors.
+## Render Deployment Instructions
+
+GigFlow is fully configured to be deployed as a **Node Web Service** on Render (Node 22 LTS).
+
+1. Push your code to GitHub.
+2. Go to your **Render Dashboard** and click **New +** > **Web Service**.
+3. Connect your GitHub repository.
+4. Use the following configuration:
+   - **Environment**: `Node`
+   - **Build Command**: `npm run clean-install` (This custom command prevents caching bugs)
+   - **Start Command**: `npm start`
+5. **Environment Variables**: Scroll down and input all the variables listed in the `.env` section above directly into Render's Environment Variables panel.
+6. Click **Create Web Service**. 
+
+Render will automatically configure Node 22, install packages, and spin up your backend server.
