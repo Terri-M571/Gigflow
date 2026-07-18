@@ -1037,7 +1037,28 @@ router.post('/ai/interview', auth, async (req, res) => {
 // SECURE GLOBAL JOBS API (Proxy for Indeed/CareerJet)
 // ==========================================
 router.get('/jobs/search', auth, async (req, res) => {
-    const { q = 'developer', location = 'Remote', page = 1 } = req.query;
+    let { q, location, page = 1 } = req.query;
+    
+    // Fallback to user profile if no query is provided
+    if (!q || q === 'developer' || !location) {
+        try {
+            const profile = await pool.query('SELECT role, industry, city, country FROM profiles WHERE user_id = $1', [req.user.id]);
+            if (profile.rows.length > 0) {
+                const p = profile.rows[0];
+                if (!q || q === 'developer') {
+                    q = p.role || p.industry || 'developer';
+                }
+                if (!location) {
+                    location = p.city ? `${p.city}, ${p.country}` : 'Remote';
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching profile for job search fallback:', err);
+        }
+    }
+
+    q = q || 'developer';
+    location = location || 'Remote';
     
     // Check if the server has configured a real API key in .env (keeping it private from frontend)
     const careerjetKey = process.env.CAREERJET_API_KEY;
@@ -1063,9 +1084,9 @@ router.get('/jobs/search', auth, async (req, res) => {
         } else {
             // Fallback mock realistic data for development if keys are not present
             const mockJobs = [
-                { id: '1', title: \`Senior \${q || 'Software'} Engineer\`, company: 'TechCorp Global', location: location || 'Remote', type: 'Full-time', salary: '$120k - $150k', posted: '2 days ago', description: 'Lead the development of scalable applications.', is_applied: false },
-                { id: '2', title: \`Mid-level \${q || 'Frontend'} Developer\`, company: 'StartupX', location: location || 'Remote', type: 'Contract', salary: '$90k - $110k', posted: '5 hours ago', description: 'Build beautiful UIs with React and Node.js.', is_applied: true },
-                { id: '3', title: \`\${q || 'Product'} Manager\`, company: 'Innovate LLC', location: 'New York, NY (Hybrid)', type: 'Full-time', salary: '$130k - $160k', posted: '1 week ago', description: 'Drive product strategy and execution.', is_applied: false }
+                { id: '1', title: `Senior ${q || 'Software'} Engineer`, company: 'TechCorp Global', location: location || 'Remote', type: 'Full-time', salary: '$120k - $150k', posted: '2 days ago', description: 'Lead the development of scalable applications.', is_applied: false },
+                { id: '2', title: `Mid-level ${q || 'Frontend'} Developer`, company: 'StartupX', location: location || 'Remote', type: 'Contract', salary: '$90k - $110k', posted: '5 hours ago', description: 'Build beautiful UIs with React and Node.js.', is_applied: true },
+                { id: '3', title: `${q || 'Product'} Manager`, company: 'Innovate LLC', location: 'New York, NY (Hybrid)', type: 'Full-time', salary: '$130k - $160k', posted: '1 week ago', description: 'Drive product strategy and execution.', is_applied: false }
             ];
             return res.json({ success: true, source: 'mock', jobs: mockJobs });
         }

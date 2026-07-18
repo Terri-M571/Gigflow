@@ -48,55 +48,23 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.innerHTML = '<span class="material-symbols-outlined spinner">sync</span> Submitting securely...';
 
         try {
-            // 3. Fetch CSRF Token (Security)
-            let csrfToken = 'fallback_token';
-            try {
-                const csrfRes = await fetch('/api/csrf');
-                if (csrfRes.ok) {
-                    const csrfData = await csrfRes.json();
-                    csrfToken = csrfData.csrfToken;
-                }
-            } catch (err) {
-                console.warn('API not running, falling back to mock mode');
-            }
-
-            // 4. Send Secure API Request to Backend
+            // Send Secure API Request to Backend
             const applicationData = {
-                jobId,
-                userId: currentUser ? currentUser.id : 'guest',
                 fullName,
                 email,
                 phone,
                 linkedin,
-                coverLetter
+                cover_letter: coverLetter
             };
 
-            let successMessage = 'Application securely submitted!';
-            
-            try {
-                const response = await fetch('/api/applications', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': csrfToken
-                    },
-                    body: JSON.stringify(applicationData)
-                });
+            const response = await API.request(`/jobs/${jobId}/apply`, 'POST', applicationData);
 
-                if (!response.ok) throw new Error('API submission failed');
-                
-                const data = await response.json();
-                successMessage = data.message || successMessage;
-            } catch (err) {
-                // Mock success if backend is down (Node.js not installed yet)
-                console.warn('Falling back to local storage mock application');
-                const apps = JSON.parse(localStorage.getItem('gigflow_applications')) || [];
-                apps.push({ ...applicationData, id: Date.now() });
-                localStorage.setItem('gigflow_applications', JSON.stringify(apps));
+            if (!response.success) {
+                throw new Error(response.message || 'API submission failed');
             }
 
-            // 5. Success Flow
-            showToast(successMessage, 'success');
+            // Success Flow
+            showToast(response.message || 'Application securely submitted!', 'success');
             
             // Redirect back to jobs board after 2 seconds
             setTimeout(() => {
