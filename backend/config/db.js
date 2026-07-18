@@ -227,7 +227,6 @@ sqliteDb.serialize(() => {
             }
         });
     });
-});
 
 // Wrapper DB object
 const db = {
