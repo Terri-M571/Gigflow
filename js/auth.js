@@ -222,7 +222,7 @@ async function handleLogin(e) {
         }, 1300);
 
     } catch (err) {
-        // Highlight errors clearly (Incorrect password, Email not found, Server unavailable)
+        // Highlight errors clearly (Incorrect password, Email not found, Backend server is not running)
         const errMsg = err.message.startsWith('❌') ? err.message : `❌ ${err.message}`;
         showToast(errMsg, 'error');
         btn.innerHTML = originalText;

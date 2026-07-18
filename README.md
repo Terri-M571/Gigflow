@@ -9,6 +9,9 @@ GigFlow is an AI-powered full-stack career ecosystem that combines job searching
 - **Authentication**: Local Secure Emulator using SQLite.
 - **AI Integration**: Google Gemini API.
 
+## Database Setup
+**Zero configuration required.** GigFlow is completely self-contained and uses a local SQLite database (`gigflow.db`). When you start the backend server, the database file and all required tables are automatically created for you. There is no need to install PostgreSQL or configure any database connection strings.
+
 ## Environment Variables
 To unlock the full functionality of GigFlow (AI generation, real databases, proper authentication), you must configure your environment variables. 
 

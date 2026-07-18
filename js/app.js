@@ -4,35 +4,14 @@
 
 window.currentUser = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Fetch Session from Supabase via backend proxy
-    await checkActiveSession();
-
-    // Auto-redirect authenticated users away from login/signup pages
-    if (isLoggedIn()) {
-        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-        const isComplete = window.currentUser.is_complete === true || String(window.currentUser.is_complete) === '1' || String(window.currentUser.is_complete).toLowerCase() === 'true';
-
-        // If profile is NOT complete, force them to onboarding
-        if (!isComplete && currentPage !== 'onboarding.html') {
-            window.location.href = 'onboarding.html';
-            return;
-        }
-        
-        // If profile IS complete, prevent access to auth pages & onboarding
-        if (isComplete && (currentPage === 'login.html' || currentPage === 'signup.html' || currentPage === 'onboarding.html')) {
-            window.location.href = 'dashboard.html';
-            return;
-        }
-    }
-
-    // 2. Initialize Theme (Light / Dark Mode)
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialize Theme (Light / Dark Mode)
     initTheme();
 
-    // 3. Inject Shared Layout Elements (Navbar, Sidebar, Footer)
+    // 2. Inject Shared Layout Elements (Navbar, Sidebar, Footer)
     injectLayouts();
 
-    // 4. Setup Layout Interactions (collapsible sidebar, active links, profile menu dropdown)
+    // 3. Setup Layout Interactions (collapsible sidebar, active links, profile menu dropdown)
     setupLayoutInteractions();
 });
 
@@ -65,30 +44,15 @@ function toggleTheme() {
 }
 
 /* ============================================================
-   AUTH GUARD — Checks session from backend
+   STATIC MOCK AUTH
    ============================================================ */
 function isLoggedIn() {
-    return !!window.currentUser;
+    return false;
 }
 
-async function checkActiveSession() {
-    try {
-        const data = await API.getSession();
-        window.currentUser = data.user;
-    } catch (e) {
-        window.currentUser = null;
-    }
-}
-
-/**
- * Handle user logout globally.
- */
-async function handleLogout(e) {
+function handleLogout(e) {
     if (e) e.preventDefault();
-    showToast('Logging out...', 'info');
-    try {
-        await API.logout();
-    } catch (_) {}
+    showToast('Logged out', 'info');
     window.currentUser = null;
     setTimeout(() => {
         window.location.href = 'index.html';
