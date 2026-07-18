@@ -1,19 +1,41 @@
 {
-  "name": "gigflow-api",
+  "name": "gigflow",
   "version": "1.0.0",
-  "description": "GigFlow Backend API with MongoDB and Express",
-  "main": "server.js",
+  "description": "GigFlow Full Stack Application",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "postinstall": "cd backend && npm install"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.6",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "mongoose": "^7.5.0"
+    "docx": "^9.7.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "express-session": "^1.18.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.12.0",
+    "mongoose": "^7.5.0",
+    "multer": "^2.2.0",
+    "nodemailer": "^6.9.14",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-linkedin-oauth2": "^2.0.0",
+    "passport-microsoft": "^1.0.0",
+    "pdf-parse": "^1.1.1",
+    "pg": "^8.12.0",
+    "sqlite3": "^6.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.1.4"
+  },
+  "allowScripts": {
+    "sqlite3@6.0.1": true
   }
 }
