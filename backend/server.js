@@ -1,4 +1,16 @@
 require('dotenv').config();
+
+// Environment Variable Hardening
+const criticalVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'GEMINI_API_KEY', 'DATABASE_URL'];
+const missingVars = criticalVars.filter(v => !process.env[v] || process.env[v].includes('placeholder'));
+if (missingVars.length > 0) {
+    console.warn('\n=============================================================');
+    console.warn('⚠️  STARTUP WARNING: Missing or Placeholder Environment Variables');
+    console.warn(`   The following keys are not configured: ${missingVars.join(', ')}`);
+    console.warn('   GigFlow will seamlessly fall back to local/emulator modes.');
+    console.warn('=============================================================\n');
+}
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');

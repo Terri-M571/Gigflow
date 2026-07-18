@@ -1,15 +1,19 @@
 {
   "name": "gigflow",
   "version": "1.0.0",
+  "engines": {
+    "node": "22.x"
+  },
   "description": "GigFlow Full Stack Application",
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
+    "build": "echo 'No build step required for Vanilla JS frontend'",
     "postinstall": "cd backend && npm install"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.39.3",
+    "@supabase/supabase-js": "^2.110.7",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
