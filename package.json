@@ -1,9 +1,6 @@
 {
   "name": "gigflow",
   "version": "1.0.0",
-  "engines": {
-    "node": "20.x"
-  },
   "description": "GigFlow Full Stack Application",
   "main": "backend/server.js",
   "scripts": {
