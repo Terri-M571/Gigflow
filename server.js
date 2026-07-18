@@ -8,4 +8,18 @@ pm start\.
  * proxies directly to the real backend server.
  */
 
-require('./backend/server.js');
+process.on('uncaughtException', (err) => {
+    console.error('FATAL UNCAUGHT EXCEPTION:', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('FATAL UNHANDLED REJECTION:', reason);
+});
+
+try {
+    require('./backend/server.js');
+} catch (error) {
+    console.error('FAILED TO START BACKEND SERVER:', error);
+    process.exit(1);
+}
